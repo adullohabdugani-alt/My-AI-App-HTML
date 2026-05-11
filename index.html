@@ -3,175 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI Global Pro</title>
+    <title>Abdugani Polyglot AI</title>
     <style>
-        :root {
-            --neon-blue: #00f2fe;
-            --neon-purple: #9d00ff;
-            --dark-bg: #0a0a12;
-        }
-        body {
-            margin: 0; background: var(--dark-bg); color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 15px; box-sizing: border-box;
-        }
-        .ai-card {
-            width: 100%; max-width: 500px; background: rgba(255, 255, 255, 0.05);
-            padding: 30px 20px; border-radius: 30px; border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2); backdrop-filter: blur(15px);
-            text-align: center;
-        }
-        .time { font-family: monospace; color: var(--neon-blue); font-size: 18px; margin-bottom: 10px; }
-        .title { font-size: 24px; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; }
-        .title span { color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple); }
-
+        :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
+        body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
+        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 30px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); box-shadow: 0 0 20px rgba(0,242,254,0.2); }
+        .title { font-size: 22px; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; color: white; }
+        .title span { color: var(--purple); }
         .row { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        .btn-lang {
-            background: transparent; border: 1px solid var(--neon-blue); color: white;
-            padding: 8px 15px; border-radius: 12px; cursor: pointer; transition: 0.3s;
-        }
-        .btn-lang.active { background: var(--neon-blue); color: black; font-weight: bold; }
-
-        select {
-            width: 100%; background: #1a1a2e; color: white; border: 1px solid var(--neon-purple);
-            padding: 10px; border-radius: 15px; margin-bottom: 20px; outline: none;
-        }
-
-        input {
-            width: 100%; padding: 15px 20px; border-radius: 25px; border: none;
-            font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box;
-        }
-        .go-btn {
-            width: 100%; padding: 15px; border-radius: 25px; border: none;
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
-            color: white; font-weight: bold; font-size: 18px; cursor: pointer;
-        }
-
-        .output {
-            margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.5);
-            border-radius: 15px; border-left: 4px solid var(--neon-blue);
-            text-align: left; display: none; font-size: 16px; line-height: 1.6;
-            animation: fadeIn 0.4s;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn-l { background: transparent; border: 1px solid var(--blue); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; }
+        .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
+        select { width: 100%; background: #1a1a2e; color: white; border: 1px solid var(--purple); padding: 10px; border-radius: 15px; margin-bottom: 20px; outline: none; }
+        input { width: 100%; padding: 15px; border-radius: 25px; border: none; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .go { width: 100%; padding: 15px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .out { margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; font-size: 17px; }
     </style>
 </head>
 <body>
 
-<div class="ai-card">
-    <div class="time" id="clock">00:00:00</div>
-    <div class="title">ABDUGANI <span>GLOBAL AI</span></div>
+<div class="card">
+    <div id="clock" style="color:var(--blue); margin-bottom:10px; font-family:monospace;">00:00:00</div>
+    <div class="title">ABDUGANI <span>POLYGLOT AI</span></div>
 
     <div class="row">
-        <button class="btn-lang active" onclick="setL('ru', this)">RU</button>
-        <button class="btn-lang" onclick="setL('uz', this)">UZ</button>
-        <button class="btn-lang" onclick="setL('en', this)">EN</button>
+        <button class="btn-l active" onclick="setL('ru', this)">RU</button>
+        <button class="btn-l" onclick="setL('uz', this)">UZ</button>
+        <button class="btn-l" onclick="setL('en', this)">EN</button>
     </div>
 
-    <select id="voiceList"><option>Loading voices...</option></select>
-
-    <input type="text" id="userInput" placeholder="Ask me anything...">
-    <button class="go-btn" onclick="askAI()">GO / START</button>
-
-    <div class="output" id="res"></div>
+    <select id="vList"><option>Loading...</option></select>
+    <input type="text" id="uIn" placeholder="Напиши: Привет, Salom или Hello">
+    <button class="go" onclick="runAI()">GO / START</button>
+    <div class="out" id="res"></div>
 </div>
 
 <script>
-    let currentL = 'ru';
+    let curL = 'ru';
     let synth = window.speechSynthesis;
-    let voices = [];
-
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
-    function loadVoices() {
-        voices = synth.getVoices();
-        const select = document.getElementById('voiceList');
-        select.innerHTML = '';
-        voices.forEach((v, i) => {
-            const opt = document.createElement('option');
-            opt.textContent = `${v.name} (${v.lang})`;
-            opt.value = i;
-            select.appendChild(opt);
+    function setL(l, b) {
+        curL = l;
+        document.querySelectorAll('.btn-l').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+    }
+
+    function loadV() {
+        let vs = synth.getVoices();
+        const sel = document.getElementById('vList');
+        sel.innerHTML = '';
+        vs.forEach((v, i) => {
+            let o = document.createElement('option');
+            o.textContent = `${v.name} (${v.lang})`;
+            o.value = i;
+            sel.appendChild(o);
         });
     }
-    if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = loadVoices; }
-    loadVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = loadV; }
+    loadV();
 
-    function setL(l, b) {
-        currentL = l;
-        document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-        b.classList.add('active');
-        const place = { ru: "Спросите меня...", uz: "Mendan so'rang...", en: "Ask me anything..." };
-        document.getElementById('userInput').placeholder = place[l];
-    }
-
-    const brain = {
-        "привет": { ru: "Привет! Я Abdugani AI. Готов к работе!", uz: "Salom! Men Abdugani AI. Ishga tayyorman!", en: "Hello! I am Abdugani AI. Ready to work!" },
-        "hi": { ru: "Привет! Я Abdugani AI. Готов к работе!", uz: "Salom! Men Abdugani AI. Ishga tayyorman!", en: "Hi there! I am Abdugani AI. How can I help you today?" },
-        "how are you": { ru: "Я чувствую себя отлично! Мои алгоритмы работают на 100%.", uz: "Men juda yaxshiman! Algoritmlarim 100% ishlamoqda.", en: "I am feeling great! My algorithms are running at 100% efficiency." },
-        "как ты": { ru: "Я чувствую себя отлично! Мои алгоритмы работают на 100%.", uz: "Men juda yaxshiman! Algoritmlarim 100% ishlamoqda.", en: "I am feeling great! My algorithms are running at 100% efficiency." },
-        "пирамид": { 
-            ru: "Пирамиды Египта полны секретов. Самая большая — пирамида Хеопса.", 
-            uz: "Misr exromlari sirlarga boy. Eng kattasi — Xeops exromidir.", 
-            en: "The pyramids of Egypt are full of secrets. The largest one is the Great Pyramid of Giza." 
+    // МОЗГ С МУЛЬТИЯЗЫЧНЫМИ ОТВЕТАМИ
+    const data = {
+        greetings: {
+            keys: ["привет", "salom", "hello", "hi", "hey", "ассалому", "прив"],
+            all: "Привет! 👋 | Salom! 🤝 | Hello! 🚀"
         },
-        "pyramid": { 
-            ru: "Пирамиды Египта полны секретов. Самая большая — пирамида Хеопса.", 
-            uz: "Misr exromlari sirlarga boy. Eng kattasi — Xeops exromidir.", 
-            en: "The pyramids of Egypt were built over 4,500 years ago as tombs for the pharaohs." 
+        howareyou: {
+            keys: ["как ты", "qandaysan", "how are you", "ishlar", "how it going"],
+            all: "Всё отлично! | Hammasi zo'r! | Everything is great!"
         },
-        "эйнштейн": { ru: "Эйнштейн открыл закон E=mc².", uz: "Eynshteyn E=mc² qonunini kashf qilgan.", en: "Albert Einstein developed the theory of relativity and the formula E=mc²." },
-        "einstein": { ru: "Эйнштейн открыл закон E=mc².", uz: "Eynshteyn E=mc² qonunini kashf qilgan.", en: "Albert Einstein is one of the greatest physicists. He won the Nobel Prize in 1921." },
-        "tesla": { ru: "Никола Тесла — гений электричества.", uz: "Nikola Tesla — elektr energiyasi dahosi.", en: "Nikola Tesla was a brilliant inventor who developed the alternating current (AC) system." }
+        whoareyou: {
+            keys: ["кто ты", "kim san", "who are you"],
+            all: "Я — Abdugani AI. | Men — Abdugani AI. | I am Abdugani AI."
+        }
     };
 
-    function askAI() {
-        const val = document.getElementById('userInput').value.toLowerCase().trim();
+    function runAI() {
+        const val = document.getElementById('uIn').value.toLowerCase().trim();
         const out = document.getElementById('res');
-        let answer = "";
+        let ans = "";
 
         let found = false;
-        for (let key in brain) {
-            if (val.includes(key)) {
-                answer = brain[key][currentL];
-                found = true;
-                break;
+        for (let id in data) {
+            if (data[id].keys.some(k => val.includes(k))) {
+                ans = data[id].all; // Выдает ответ на всех языках сразу!
+                found = true; break;
             }
         }
 
         if (!found) {
             try {
-                if (/[0-9]/.test(val)) { 
-                    let res = eval(val.replace(/[^-0-9+*/.]/g, ''));
-                    answer = (currentL === 'en' ? "Result: " : (currentL === 'uz' ? "Natija: " : "Результат: ")) + res;
-                } else {
-                    const noIdea = {
-                        ru: "Я пока учусь, Абдугани скоро расскажет мне об этом!",
-                        uz: "Men hali o'rganyapman, Abdugani tezda menga buni tushuntiradi!",
-                        en: "I am still learning, Abdugani will teach me about this soon!"
-                    };
-                    answer = noIdea[currentL];
+                if (/[0-9]/.test(val)) { ans = "Calc: " + eval(val.replace(/[^-0-9+*/.]/g, '')); }
+                else { 
+                    const no = { ru: "Я пока учусь...", uz: "Hali o'rganyapman...", en: "Still learning..." };
+                    ans = no[curL];
                 }
-            } catch { answer = "Error / Ошибка"; }
+            } catch { ans = "Error"; }
         }
 
         out.style.display = "block";
-        out.innerText = answer;
-
-        synth.cancel();
-        const speech = new SpeechSynthesisUtterance(answer);
-        const selectedVoiceIdx = document.getElementById('voiceList').value;
-        if(voices[selectedVoiceIdx]) speech.voice = voices[selectedVoiceIdx];
+        out.innerText = ans;
         
-        // Авто-подбор языка для голоса
-        if (currentL === 'en') speech.lang = 'en-US';
-        else if (currentL === 'uz') speech.lang = 'uz-UZ';
-        else speech.lang = 'ru-RU';
-
-        synth.speak(speech);
+        synth.cancel();
+        let s = new SpeechSynthesisUtterance(ans);
+        let v = synth.getVoices()[document.getElementById('vList').value];
+        if(v) s.voice = v;
+        synth.speak(s);
     }
 </script>
-
 </body>
 </html>
