@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdugani AI 3.0 - Fixed Edition</title>
+    <style>
+        :root {
+            --neon-blue: #00f2fe;
+            --neon-purple: #9d00ff;
+            --dark: #0a0a12;
+        }
+        body {
+            margin: 0; background: var(--dark); color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-y: auto; padding: 20px;
+        }
+        .ai-container {
+            width: 95%; max-width: 700px; padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 40px; border: 1px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px); text-align: center;
+        }
+        .clock-top { font-family: 'Courier New', monospace; font-size: 24px; color: var(--neon-blue); margin-bottom: 20px; }
+        .title { font-size: 38px; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px; }
+        .title span { color: var(--neon-purple); }
+
+        .controls { margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .lang-btn {
+            background: transparent; border: 1px solid var(--neon-blue); color: white;
+            padding: 8px 20px; cursor: pointer; border-radius: 15px; transition: 0.3s;
+        }
+        .lang-btn.active { background: var(--neon-blue); color: black; font-weight: bold; }
+
+        select {
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--neon-purple);
+            padding: 8px; border-radius: 10px; outline: none; width: 100%; max-width: 300px;
+        }
+
+        .search-container {
+            display: flex; background: white; border-radius: 50px; padding: 5px; margin-top: 20px;
+        }
+        input {
+            flex: 1; border: none; outline: none; padding: 15px 25px;
+            font-size: 18px; border-radius: 50px; color: #333;
+        }
+        .go-btn {
+            background: var(--neon-purple); color: white; border: none;
+            padding: 0 30px; border-radius: 50px; cursor: pointer; font-weight: bold;
+        }
+
+        .output {
+            margin-top: 30px; padding: 25px; background: rgba(0,0,0,0.4);
+            border-radius: 20px; font-size: 19px; line-height: 1.6;
+            display: none; text-align: left; border-left: 5px solid var(--neon-blue);
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="ai-container">
+    <div class="clock-top" id="timer">00:00:00</div>
+    <div class="title">ABDUGANI AI <span>PRO MAX 3</span></div>
+    
+    <div class="controls">
+        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="setLang('uz', this)">UZ</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+    </div>
+
+    <div class="controls">
+        <select id="voiceSelect"><option>Загрузка голосов...</option></select>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="userInput" placeholder="Спросите меня о чем-то...">
+        <button class="go-btn" onclick="askAI()">GO</button>
+    </div>
+
+    <div class="output" id="out"></div>
+</div>
+
+<script>
+    let currentLang = 'ru';
+    const voiceSelect = document.getElementById('voiceSelect');
+    let synth = window.speechSynthesis;
+    let voices = [];
+
+    // Обновление часов
+    setInterval(() => {
+        document.getElementById('timer').innerText = new Date().toLocaleTimeString();
+    }, 1000);
+
+// Загрузка голосов
+    function populateVoiceList() {
+        voices = synth.getVoices();
+        voiceSelect.innerHTML = '';
+        voices.forEach((voice) => {
+            const option = document.createElement('option');
+            option.textContent = 
+${voice.name} (${voice.lang})
+;
+            option.setAttribute('data-lang', voice.lang);
+            option.setAttribute('data-name', voice.name);
+            voiceSelect.appendChild(option);
+        });
+    }
+
+    populateVoiceList();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
+
+    // База данных знаний
+    const brain = [
+        {
+            keys: ["привет", "salom", "hello", "hi"],
+            ru: "Привет! Я Abdugani AI. Готов открыть тебе тайны науки.",
+            uz: "Salom! Men Abdugani AI tizimiman. Ilm-fan sirlarini ochishga tayyorman.",
+            en: "Hello! I am Abdugani AI. Ready to reveal the secrets of science to you."
+        },
+        {
+            keys: ["эйнштейн", "eynshteyn", "einstein"],
+            ru: "Альберт Эйнштейн — физик, создавший теорию относительности (E=mc²).",
+            uz: "Albert Eynshteyn — nisbiylik nazariyasi asoschisi (E=mc²).",
+            en: "Albert Einstein — physicist who created the theory of relativity (E=mc²)."
+        },
+        {
+            keys: ["эдисон", "edison"],
+            ru: "Томас Эдисон — изобретатель лампочки и фонографа. Более 1000 патентов!",
+            uz: "Tomas Edison — lampochka va fonograf ixtirochisi. 1000 dan ortiq patentlar egasi!",
+            en: "Thomas Edison — inventor of the light bulb and phonograph. Holder of over 1000 patents!"
+        }
+    ];
+
+    function setLang(l, btn) {
+        currentLang = l;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const hints = { ru: "Спросите меня...", uz: "Mendan so'rang...", en: "Ask me anything..." };
+        document.getElementById('userInput').placeholder = hints[l];
+    }
+
+    function askAI() {
+        const val = document.getElementById('userInput').value.toLowerCase().trim();
+        const out = document.getElementById('out');
+        let answer = "";
+
+        if(val === "") return;
+
+        // 1. ПРОВЕРКА НА МАТЕМАТИКУ (СЧЕТ)
+        // Регулярное выражение ищет цифры и знаки + - * /
+        const mathChars = val.replace(/[^-0-9+*/().\s]/g, '');
+        const hasNumbers = /[0-9]/.test(val);
+
+        if (hasNumbers && mathChars.length > 2) {
+            try {
+                const result = eval(mathChars);
+                const prefix = { ru: "Результат: ", uz: "Natija: ", en: "Result: " };
+                answer = prefix[currentLang] + result;
+            } catch (e) {
+                // Если это не математика, пойдем искать в базу
+                findInBrain();
+            }
+        } else {
+            findInBrain();
+        }
+
+        function findInBrain() {
+            let foundData = brain.find(item => item.keys.some(k => val.includes(k)));
+            if (foundData) {
+                answer = foundData[currentLang];
+            } else {
+                const error = {
+                    ru: "Я этого еще не знаю, но Абdugani скоро научит меня всему!",
+                    uz: "Buni hali bilmayman, lekin Abdugani yaqinda meni o'rgatadi!",
+                    en: "I don't know this yet, but Abdugani will teach me soon!"
+                };
+                answer = error[currentLang];
+            }
+        }
+
+        // Вывод результата
+        out.style.display = "block";
+        out.innerText = answer;
+
+        // Озвучка
+        synth.cancel();
+        const utterThis = new SpeechSynthesisUtterance(answer);
+        const selectedVoiceName = voiceSelect.selectedOptions[0]?.getAttribute('data-name');
+        
+        const voice = voices.find(v => v.name === selectedVoiceName);
+        if (voice) utterThis.voice = voice;
+
+        synth.speak(utterThis);
+    }
+</script>
+
+</body>
+</html>
