@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+Oyjonim:
+<!DOCTYPE html> 
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI 3.0 - Fixed Edition</title>
+    <title>Abdugani AI 3.0 - Pro Edition</title>
     <style>
         :root {
             --neon-blue: #00f2fe;
@@ -53,8 +54,9 @@
 
         .output {
             margin-top: 30px; padding: 25px; background: rgba(0,0,0,0.4);
-            border-radius: 20px; font-size: 19px; line-height: 1.6;
+            border-radius: 20px; font-size: 18px; line-height: 1.6;
             display: none; text-align: left; border-left: 5px solid var(--neon-blue);
+            white-space: pre-wrap; font-family: 'Consolas', monospace;
             animation: fadeIn 0.5s;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -90,13 +92,11 @@
     let synth = window.speechSynthesis;
     let voices = [];
 
-    // Обновление часов
     setInterval(() => {
         document.getElementById('timer').innerText = new Date().toLocaleTimeString();
     }, 1000);
 
-// Загрузка голосов
-    function populateVoiceList() {
+function populateVoiceList() {
         voices = synth.getVoices();
         voiceSelect.innerHTML = '';
         voices.forEach((voice) => {
@@ -115,7 +115,6 @@ ${voice.name} (${voice.lang})
         speechSynthesis.onvoiceschanged = populateVoiceList;
     }
 
-    // База данных знаний
     const brain = [
         {
             keys: ["привет", "salom", "hello", "hi"],
@@ -124,16 +123,22 @@ ${voice.name} (${voice.lang})
             en: "Hello! I am Abdugani AI. Ready to reveal the secrets of science to you."
         },
         {
+            keys: ["наполеон", "napoleon"],
+            ru: "Наполеон Бонапарт — великий французский полководец и император. Он перекроил карту Европы, но потерпел поражение при Ватерлоо.",
+            uz: "Napoleon Bonapart — buyuk fransuz sarkardasi va imperatori. U Yevropa xaritasini o'zgartirgan, ammo Vaterloo jangida mag'lub bo'lgan.",
+            en: "Napoleon Bonaparte was a great French military leader and emperor. He reshaped Europe but was defeated at Waterloo."
+        },
+        {
             keys: ["эйнштейн", "eynshteyn", "einstein"],
             ru: "Альберт Эйнштейн — физик, создавший теорию относительности (E=mc²).",
             uz: "Albert Eynshteyn — nisbiylik nazariyasi asoschisi (E=mc²).",
             en: "Albert Einstein — physicist who created the theory of relativity (E=mc²)."
         },
         {
-            keys: ["эдисон", "edison"],
-            ru: "Томас Эдисон — изобретатель лампочки и фонографа. Более 1000 патентов!",
-            uz: "Tomas Edison — lampochka va fonograf ixtirochisi. 1000 dan ortiq patentlar egasi!",
-            en: "Thomas Edison — inventor of the light bulb and phonograph. Holder of over 1000 patents!"
+            keys: ["энигма", "enigma", "enigma"],
+            ru: "404 !!! ####### %%%%%.",
+            uz: "404 !!! ####### %%%%%.",
+            en: "404 !!! ####### %%%%%."
         }
     ];
 
@@ -152,53 +157,52 @@ ${voice.name} (${voice.lang})
 
         if(val === "") return;
 
-        // 1. ПРОВЕРКА НА МАТЕМАТИКУ (СЧЕТ)
-        // Регулярное выражение ищет цифры и знаки + - * /
-        const mathChars = val.replace(/[^-0-9+*/().\s]/g, '');
-        const hasNumbers = /[0-9]/.test(val);
-
-        if (hasNumbers && mathChars.length > 2) {
-            try {
-                const result = eval(mathChars);
-                const prefix = { ru: "Результат: ", uz: "Natija: ", en: "Result: " };
-                answer = prefix[currentLang] + result;
-            } catch (e) {
-                // Если это не математика, пойдем искать в базу
-                findInBrain();
+        // 1. ЛОГИКА ДЛЯ КОДА
+        if (val.includes("код")  val.includes("code")  val.includes("dastur") || val.includes("html")) {
+            if (val.includes("html")) {
+                answer = "Вот простой пример HTML:\n\n<!DOCTYPE html>\n<html>\n<head>\n  <title>Page</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n</body>\n</html>";
+            } else if (val.includes("python")) {
+                answer = "Код на Python:\n\nprint('Hello, Abdugani AI!')\n# Это вывод текста";
+            } else {
+                answer = "Уточните язык кода (например: 'напиши код на html').";
             }
-        } else {
+        } 
+        // 2. МАТЕМАТИКА
+        else if (/[0-9]/.test(val) && /[+\-*/]/.test(val)) {
+            try {
+                const mathChars = val.replace(/[^-0-9+*/().\s]/g, '');
+                answer = "Результат: " + eval(mathChars);
+            } catch (e) { findInBrain(); }
+        } 
+        // 3. ПОИСК В БАЗЕ (Наполеон и др.)
+        else {
             findInBrain();
         }
 
-        function findInBrain() {
+function findInBrain() {
             let foundData = brain.find(item => item.keys.some(k => val.includes(k)));
             if (foundData) {
                 answer = foundData[currentLang];
             } else {
                 const error = {
-                    ru: "Я этого еще не знаю, но Абdugani скоро научит меня всему!",
-                    uz: "Buni hali bilmayman, lekin Abdugani yaqinda meni o'rgatadi!",
+                    ru: "Я этого еще не знаю, но Abdugani скоро научит меня!",
+                    uz: "Buni hali bilmayman, lekin Abdugani yaqinda o'rgatadi!",
                     en: "I don't know this yet, but Abdugani will teach me soon!"
                 };
                 answer = error[currentLang];
             }
         }
 
-        // Вывод результата
         out.style.display = "block";
         out.innerText = answer;
 
-        // Озвучка
         synth.cancel();
         const utterThis = new SpeechSynthesisUtterance(answer);
         const selectedVoiceName = voiceSelect.selectedOptions[0]?.getAttribute('data-name');
-        
         const voice = voices.find(v => v.name === selectedVoiceName);
         if (voice) utterThis.voice = voice;
-
         synth.speak(utterThis);
     }
 </script>
-
 </body>
 </html>
