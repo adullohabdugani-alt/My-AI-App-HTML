@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI Ultimate</title>
+    <title>Abdugani AI - Developer Edition</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
@@ -13,7 +13,7 @@
         .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
         input { width: 100%; padding: 15px; border-radius: 25px; border: none; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
         .go { width: 100%; padding: 16px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
-        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 15px; border-left: 4px solid var(--blue); text-align: left; display: none; line-height: 1.6; }
+        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; font-family: monospace; white-space: pre-wrap; font-size: 14px; }
         #payWall { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a12; z-index: 10; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; border: 2px solid var(--purple); }
         .wallet-box { background: #000; padding: 10px; border-radius: 10px; font-size: 10px; color: var(--blue); margin: 15px 0; cursor: pointer; word-break: break-all; border: 1px dashed var(--blue); }
     </style>
@@ -22,7 +22,7 @@
 
 <div class="card">
     <div style="color:var(--blue); margin-bottom:10px; font-family:monospace;" id="clock">00:00:00</div>
-    <div id="counter" style="font-size: 12px; color: #ccc; margin-bottom: 10px;">Вопросов осталось: 10</div>
+    <div id="counter" style="font-size: 12px; color: #ccc; margin-bottom: 10px;">Шансов осталось: 10</div>
 
     <div class="row">
         <button class="btn-l active" onclick="setL('ru', this)">RU</button>
@@ -30,7 +30,7 @@
         <button class="btn-l" onclick="setL('en', this)">EN</button>
     </div>
 
-    <input type="text" id="uIn" placeholder="Спроси меня...">
+    <input type="text" id="uIn" placeholder="Спроси меня или попроси код...">
     <button class="go" onclick="runAI()">GO</button>
     <div class="out" id="res"></div>
 
@@ -62,25 +62,34 @@
 
     const brain = {
         "ru": {
-            "привет": "Привет! Я Abdugani AI. О чем хочешь узнать?",
-            "пирамид": "Секрет пирамид в идеальной математике и труде тысяч людей.",
-            "эйнштейн": "Альберт Эйнштейн — физик, создавший теорию относительности.",
-            "тесла": "Никола Тесла — гений, подаривший нам переменный ток.",
-            "кто ты": "Я — Abdugani AI, твой персональный помощник."
+            "привет": "Привет! Я Abdugani AI. Как твои дела?",
+            "как ты": "Я в отличном настроении! Готов писать код и отвечать на вопросы.",
+            "код": "Вот пример кода для кнопки на HTML:\n<button style='background: blue; color: white;'>Нажми меня</button>",
+            "наполеон": "Наполеон Бонапарт — великий полководец и император Франции.",
+            "темур": "Амир Темур — основатель великой империи Тимуридов.",
+            "ибн сино": "Абу Али ибн Сино — отец медицины и великий ученый.",
+            "пирамид": "Пирамиды — чудо инженерии древнего мира.",
+            "эйнштейн": "Альберт Эйнштейн — гений, открывший теорию относительности."
         },
         "uz": {
-            "salom": "Salom! Men Abdugani AI. Sizga qanday yordam bera olaman?",
-            "exrom": "Exromlar siri ularning aniq matematik hisob-kitoblaridadir.",
-            "eynshteyn": "Albert Eynshteyn - nisbiylik nazariyasini kashf etgan buyuk fizik.",
-            "tesla": "Nikola Tesla - o'zgaruvchan tokni ixtiro qilgan daho.",
-            "kim san": "Men Abdugani AI, sening aqlli yordamchingman."
+            "salom": "Salom! Men Abdugani AI. Ishlaringiz yaxshimi?",
+            "qandaysan": "Men juda yaxshiman! Kod yozishga va savollarga javob berishga tayyorman.",
+            "kod": "Mana HTML tugmasi uchun kod misoli:\n<button style='background: green; color: white;'>Meni bos</button>",
+            "napoleon": "Napoleon Bonapart — buyuk sarkarda va imperator.",
+            "temur": "Amir Temur — buyuk sarkarda va qudratli saltanat asoschisi.",
+            "ibn sino": "Abu Ali ibn Sino — tabobat ilmining sultoni va buyuk olim.",
+            "exrom": "Exromlar — qadimgi dunyoning eng buyuk mo'jizasi.",
+            "eynshteyn": "Albert Eynshteyn — nisbiylik nazariyasi asoschisi."
         },
         "en": {
-            "hello": "Hello! I am Abdugani AI. What would you like to know?",
-            "pyramid": "The secret of the pyramids lies in their perfect mathematical alignment.",
-            "einstein": "Albert Einstein was a genius who created the theory of relativity.",
-            "tesla": "Nikola Tesla was the genius behind the alternating current system.",
-            "who are you": "I am Abdugani AI, your personal smart assistant."
+            "hello": "Hello! I am Abdugani AI. How can I help you?",
+            "how are you": "I'm doing great! Ready to write code for you.",
+            "code": "Here is an HTML button code example:\n<button style='color: red;'>Click me</button>",
+            "napoleon": "Napoleon Bonaparte was a great French military leader.",
+            "temur": "Amir Temur was a great conqueror and founder of an empire.",
+            "avicenna": "Ibn Sina (Avicenna) was a legendary physician and scholar.",
+            "pyramid": "Pyramids are a masterpiece of ancient engineering.",
+            "einstein": "Albert Einstein was a genius physicist."
         }
     };
 
@@ -95,10 +104,12 @@
         }
 
         qCount++;
-        document.getElementById('counter').innerText = "Вопросов осталось: " + (maxQ - qCount);
+        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
 
         let ans = "";
         let found = false;
+        
+        // Поиск по ключевым словам
         for (let k in brain[curL]) {
             if (val.includes(k)) {
                 ans = brain[curL][k];
@@ -108,13 +119,18 @@
 
         if (!found) {
             try {
-                if (/[0-9]/.test(val)) { ans = (curL==='en'?"Result: ":(curL==='uz'?"Natija: ":"Результат: ")) + eval(val.replace(/[^-0-9+*/.]/g, '')); }
-                else { ans = curL==='en'?"I don't know this yet.":(curL==='uz'?"Hali bilmayman.":"Я этого пока не знаю."); }
+                // Если есть цифры — считаем
+                if (/[0-9]/.test(val)) { 
+                    ans = (curL==='en'?"Result: ":(curL==='uz'?"Natija: ":"Результат: ")) + eval(val.replace(/[^-0-9+*/.]/g, '')); 
+                } else { 
+                    ans = curL==='en'?"I'm learning this! Ask Abdugani.":(curL==='uz'?"Buni o'rganyapman. Abduganidan so'rang.":"Я учусь этому! Спроси Абдугани."); 
+                }
             } catch { ans = "Error"; }
         }
 
         out.style.display = "block";
         out.innerText = ans;
+        document.getElementById('uIn').value = "";
     }
 </script>
 </body>
