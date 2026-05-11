@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI Ultimate 4.0</title>
+    <title>Abdugani AI Global Pro</title>
     <style>
         :root {
             --neon-blue: #00f2fe;
@@ -61,17 +61,18 @@
 
 <div class="ai-card">
     <div class="time" id="clock">00:00:00</div>
-    <div class="title">ABDUGANI <span>AI GENIUS</span></div>
+    <div class="title">ABDUGANI <span>GLOBAL AI</span></div>
 
     <div class="row">
         <button class="btn-lang active" onclick="setL('ru', this)">RU</button>
         <button class="btn-lang" onclick="setL('uz', this)">UZ</button>
+        <button class="btn-lang" onclick="setL('en', this)">EN</button>
     </div>
 
-    <select id="voiceList"><option>Загрузка голосов...</option></select>
+    <select id="voiceList"><option>Loading voices...</option></select>
 
-    <input type="text" id="userInput" placeholder="Спроси меня о чем угодно...">
-    <button class="go-btn" onclick="askAI()">УЗНАТЬ (GO)</button>
+    <input type="text" id="userInput" placeholder="Ask me anything...">
+    <button class="go-btn" onclick="askAI()">GO / START</button>
 
     <div class="output" id="res"></div>
 </div>
@@ -101,24 +102,35 @@
         currentL = l;
         document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
         b.classList.add('active');
+        const place = { ru: "Спросите меня...", uz: "Mendan so'rang...", en: "Ask me anything..." };
+        document.getElementById('userInput').placeholder = place[l];
     }
 
     const brain = {
-        "привет": { ru: "Привет! Я Abdugani AI. У меня отличное настроение, готов помогать!", uz: "Salom! Men Abdugani AI. Kayfiyatim a'lo, yordam berishga tayyorman!" },
-        "как ты": { ru: "Я чувствую себя отлично! Мои алгоритмы работают на полную мощность.", uz: "Men o'zimni juda yaxshi his qilyapman! Algoritmlarim to'liq quvvat bilan ishlamoqda." },
-        "пирамид": { ru: "Пирамида Хеопса — единственное из 'Семи чудес света', сохранившееся до наших дней. Секрет пирамид в их точной ориентации по звездам и невероятной инженерии древности.", uz: "Exromlar siri ularning yulduzlarga qarab aniq qurilganida va qadimgi muhandislik mo'jizasidir." },
-        "эйнштейн": { ru: "Альберт Эйнштейн — гений физики, создатель теории относительности. Его формула E=mc² изменила мир.", uz: "Albert Eynshteyn — buyuk fizik, nisbiylik nazariyasi asoschisi." },
-        "тесла": { ru: "Никола Тесла — человек, который 'изобрел XX век'. Он работал с переменным током и мечтал о беспроводной передаче энергии.", uz: "Nikola Tesla — o'zgaruvchan tok va simsiz energiya uzatish bo'yicha daho ixtirochi." },
-        "да винчи": { ru: "Леонардо да Винчи — настоящий человек Возрождения: художник, ученый, инженер и анатом.", uz: "Leonardo da Vinchi — Uyg'onish davrining eng buyuk rassomi va olimi." },
-        "джобс": { ru: "Стив Джобс — основатель Apple, который сделал технологии красивыми и удобными.", uz: "Stiv Jobs — Apple asoschisi, texnologiyalar olamini o'zgartirgan inson." }
+        "привет": { ru: "Привет! Я Abdugani AI. Готов к работе!", uz: "Salom! Men Abdugani AI. Ishga tayyorman!", en: "Hello! I am Abdugani AI. Ready to work!" },
+        "hi": { ru: "Привет! Я Abdugani AI. Готов к работе!", uz: "Salom! Men Abdugani AI. Ishga tayyorman!", en: "Hi there! I am Abdugani AI. How can I help you today?" },
+        "how are you": { ru: "Я чувствую себя отлично! Мои алгоритмы работают на 100%.", uz: "Men juda yaxshiman! Algoritmlarim 100% ishlamoqda.", en: "I am feeling great! My algorithms are running at 100% efficiency." },
+        "как ты": { ru: "Я чувствую себя отлично! Мои алгоритмы работают на 100%.", uz: "Men juda yaxshiman! Algoritmlarim 100% ishlamoqda.", en: "I am feeling great! My algorithms are running at 100% efficiency." },
+        "пирамид": { 
+            ru: "Пирамиды Египта полны секретов. Самая большая — пирамида Хеопса.", 
+            uz: "Misr exromlari sirlarga boy. Eng kattasi — Xeops exromidir.", 
+            en: "The pyramids of Egypt are full of secrets. The largest one is the Great Pyramid of Giza." 
+        },
+        "pyramid": { 
+            ru: "Пирамиды Египта полны секретов. Самая большая — пирамида Хеопса.", 
+            uz: "Misr exromlari sirlarga boy. Eng kattasi — Xeops exromidir.", 
+            en: "The pyramids of Egypt were built over 4,500 years ago as tombs for the pharaohs." 
+        },
+        "эйнштейн": { ru: "Эйнштейн открыл закон E=mc².", uz: "Eynshteyn E=mc² qonunini kashf qilgan.", en: "Albert Einstein developed the theory of relativity and the formula E=mc²." },
+        "einstein": { ru: "Эйнштейн открыл закон E=mc².", uz: "Eynshteyn E=mc² qonunini kashf qilgan.", en: "Albert Einstein is one of the greatest physicists. He won the Nobel Prize in 1921." },
+        "tesla": { ru: "Никола Тесла — гений электричества.", uz: "Nikola Tesla — elektr energiyasi dahosi.", en: "Nikola Tesla was a brilliant inventor who developed the alternating current (AC) system." }
     };
 
     function askAI() {
-        const val = document.getElementById('userInput').value.toLowerCase();
+        const val = document.getElementById('userInput').value.toLowerCase().trim();
         const out = document.getElementById('res');
         let answer = "";
 
-        // Поиск по мозгу
         let found = false;
         for (let key in brain) {
             if (val.includes(key)) {
@@ -129,21 +141,34 @@
         }
 
         if (!found) {
-            // Математика
             try {
-                if (/[0-9]/.test(val)) { answer = (currentL === 'ru' ? "Результат: " : "Natija: ") + eval(val.replace(/[^-0-9+*/.]/g, '')); }
-                else { answer = currentL === 'ru' ? "Я пока изучаю этот вопрос, но Абдугани скоро добавит это в мои знания!" : "Buni hali bilmayman, lekin Abdugani tez orada o'rgatadi!"; }
-            } catch { answer = "Хмм, попробуй спросить иначе."; }
+                if (/[0-9]/.test(val)) { 
+                    let res = eval(val.replace(/[^-0-9+*/.]/g, ''));
+                    answer = (currentL === 'en' ? "Result: " : (currentL === 'uz' ? "Natija: " : "Результат: ")) + res;
+                } else {
+                    const noIdea = {
+                        ru: "Я пока учусь, Абдугани скоро расскажет мне об этом!",
+                        uz: "Men hali o'rganyapman, Abdugani tezda menga buni tushuntiradi!",
+                        en: "I am still learning, Abdugani will teach me about this soon!"
+                    };
+                    answer = noIdea[currentL];
+                }
+            } catch { answer = "Error / Ошибка"; }
         }
 
         out.style.display = "block";
         out.innerText = answer;
 
-        // Озвучка
         synth.cancel();
         const speech = new SpeechSynthesisUtterance(answer);
         const selectedVoiceIdx = document.getElementById('voiceList').value;
         if(voices[selectedVoiceIdx]) speech.voice = voices[selectedVoiceIdx];
+        
+        // Авто-подбор языка для голоса
+        if (currentL === 'en') speech.lang = 'en-US';
+        else if (currentL === 'uz') speech.lang = 'uz-UZ';
+        else speech.lang = 'ru-RU';
+
         synth.speak(speech);
     }
 </script>
