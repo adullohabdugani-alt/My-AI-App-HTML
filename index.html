@@ -1,207 +1,69 @@
-<!DOCTYPE html> 
-<html lang="uz">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI 3.0 - Pro Edition</title>
-    <style>
-        :root {
-            --neon-blue: #00f2fe;
-            --neon-purple: #9d00ff;
-            --dark: #0a0a12;
-        }
-        body {
-            margin: 0; background: var(--dark); color: white;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; overflow-y: auto; padding: 20px;
-        }
-        .ai-container {
-            width: 95%; max-width: 700px; padding: 40px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 40px; border: 1px solid rgba(0, 242, 254, 0.3);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px); text-align: center;
-        }
-        .clock-top { font-family: 'Courier New', monospace; font-size: 24px; color: var(--neon-blue); margin-bottom: 20px; }
-        .title { font-size: 38px; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px; }
-        .title span { color: var(--neon-purple); }
-
-        .controls { margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .lang-btn {
-            background: transparent; border: 1px solid var(--neon-blue); color: white;
-            padding: 8px 20px; cursor: pointer; border-radius: 15px; transition: 0.3s;
-        }
-        .lang-btn.active { background: var(--neon-blue); color: black; font-weight: bold; }
-
-        select {
-            background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--neon-purple);
-            padding: 8px; border-radius: 10px; outline: none; width: 100%; max-width: 300px;
-        }
-
-        .search-container {
-            display: flex; background: white; border-radius: 50px; padding: 5px; margin-top: 20px;
-        }
-        input {
-            flex: 1; border: none; outline: none; padding: 15px 25px;
-            font-size: 18px; border-radius: 50px; color: #333;
-        }
-        .go-btn {
-            background: var(--neon-purple); color: white; border: none;
-            padding: 0 30px; border-radius: 50px; cursor: pointer; font-weight: bold;
-        }
-
-        .output {
-            margin-top: 30px; padding: 25px; background: rgba(0,0,0,0.4);
-            border-radius: 20px; font-size: 18px; line-height: 1.6;
-            display: none; text-align: left; border-left: 5px solid var(--neon-blue);
-            white-space: pre-wrap; font-family: 'Consolas', monospace;
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdugani AI PRO</title>
+    <style>
+        body {
+            margin: 0; background: #0a0a12; color: white;
+            font-family: sans-serif; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 15px; box-sizing: border-box;
+        }
+        .container {
+            width: 100%; max-width: 400px; background: rgba(255,255,255,0.05);
+            padding: 25px; border-radius: 25px; border: 1px solid #00f2fe;
+            text-align: center; backdrop-filter: blur(10px);
+        }
+        .title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #00f2fe; }
+        .title span { color: #9d00ff; }
+        
+        input {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            margin-bottom: 15px; font-size: 16px; outline: none; box-sizing: border-box;
+        }
+        .go-btn {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            background: linear-gradient(45deg, #00f2fe, #9d00ff);
+            color: white; font-weight: bold; font-size: 18px; cursor: pointer;
+        }
+        .output {
+            margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.5);
+            border-radius: 10px; display: none; text-align: left;
+            border-left: 4px solid #00f2fe; word-wrap: break-word;
+        }
+    </style>
 </head>
 <body>
 
-<div class="ai-container">
-    <div class="clock-top" id="timer">00:00:00</div>
-    <div class="title">ABDUGANI AI <span>PRO MAX 3</span></div>
-    
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="setLang('uz', this)">UZ</button>
-        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
-    </div>
-
-    <div class="controls">
-        <select id="voiceSelect"><option>Загрузка голосов...</option></select>
-    </div>
-
-    <div class="search-container">
-        <input type="text" id="userInput" placeholder="Спросите меня о чем-то...">
-        <button class="go-btn" onclick="askAI()">GO</button>
-    </div>
-
-    <div class="output" id="out"></div>
+<div class="container">
+    <div class="title">ABDUGANI <span>AI PRO</span></div>
+    <input type="text" id="userInput" placeholder="Напиши пример (н-р: 5+5)">
+    <button class="go-btn" onclick="askAI()">ОТПРАВИТЬ (GO)</button>
+    <div class="output" id="out"></div>
 </div>
 
 <script>
-    let currentLang = 'ru';
-    const voiceSelect = document.getElementById('voiceSelect');
-    let synth = window.speechSynthesis;
-    let voices = [];
+    function askAI() {
+        const val = document.getElementById('userInput').value;
+        const out = document.getElementById('out');
+        
+        if(!val) return;
 
-    setInterval(() => {
-        document.getElementById('timer').innerText = new Date().toLocaleTimeString();
-    }, 1000);
-
-function populateVoiceList() {
-        voices = synth.getVoices();
-        voiceSelect.innerHTML = '';
-        voices.forEach((voice) => {
-            const option = document.createElement('option');
-            option.textContent = 
-${voice.name} (${voice.lang})
-;
-            option.setAttribute('data-lang', voice.lang);
-            option.setAttribute('data-name', voice.name);
-            voiceSelect.appendChild(option);
-        });
-    }
-
-    populateVoiceList();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = populateVoiceList;
-    }
-
-    const brain = [
-        {
-            keys: ["привет", "salom", "hello", "hi"],
-            ru: "Привет! Я Abdugani AI. Готов открыть тебе тайны науки.",
-            uz: "Salom! Men Abdugani AI tizimiman. Ilm-fan sirlarini ochishga tayyorman.",
-            en: "Hello! I am Abdugani AI. Ready to reveal the secrets of science to you."
-        },
-        {
-            keys: ["наполеон", "napoleon"],
-            ru: "Наполеон Бонапарт — великий французский полководец и император. Он перекроил карту Европы, но потерпел поражение при Ватерлоо.",
-            uz: "Napoleon Bonapart — buyuk fransuz sarkardasi va imperatori. U Yevropa xaritasini o'zgartirgan, ammo Vaterloo jangida mag'lub bo'lgan.",
-            en: "Napoleon Bonaparte was a great French military leader and emperor. He reshaped Europe but was defeated at Waterloo."
-        },
-        {
-            keys: ["эйнштейн", "eynshteyn", "einstein"],
-            ru: "Альберт Эйнштейн — физик, создавший теорию относительности (E=mc²).",
-            uz: "Albert Eynshteyn — nisbiylik nazariyasi asoschisi (E=mc²).",
-            en: "Albert Einstein — physicist who created the theory of relativity (E=mc²)."
-        },
-        {
-            keys: ["энигма", "enigma", "enigma"],
-            ru: "404 !!! ####### %%%%%.",
-            uz: "404 !!! ####### %%%%%.",
-            en: "404 !!! ####### %%%%%."
-        }
-    ];
-
-    function setLang(l, btn) {
-        currentLang = l;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const hints = { ru: "Спросите меня...", uz: "Mendan so'rang...", en: "Ask me anything..." };
-        document.getElementById('userInput').placeholder = hints[l];
-    }
-
-    function askAI() {
-        const val = document.getElementById('userInput').value.toLowerCase().trim();
-        const out = document.getElementById('out');
-        let answer = "";
-
-        if(val === "") return;
-
-        // 1. ЛОГИКА ДЛЯ КОДА
-        if (val.includes("код")  val.includes("code")  val.includes("dastur") || val.includes("html")) {
-            if (val.includes("html")) {
-                answer = "Вот простой пример HTML:\n\n<!DOCTYPE html>\n<html>\n<head>\n  <title>Page</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n</body>\n</html>";
-            } else if (val.includes("python")) {
-                answer = "Код на Python:\n\nprint('Hello, Abdugani AI!')\n# Это вывод текста";
-            } else {
-                answer = "Уточните язык кода (например: 'напиши код на html').";
-            }
-        } 
-        // 2. МАТЕМАТИКА
-        else if (/[0-9]/.test(val) && /[+\-*/]/.test(val)) {
-            try {
-                const mathChars = val.replace(/[^-0-9+*/().\s]/g, '');
-                answer = "Результат: " + eval(mathChars);
-            } catch (e) { findInBrain(); }
-        } 
-        // 3. ПОИСК В БАЗЕ (Наполеон и др.)
-        else {
-            findInBrain();
-        }
-
-function findInBrain() {
-            let foundData = brain.find(item => item.keys.some(k => val.includes(k)));
-            if (foundData) {
-                answer = foundData[currentLang];
-            } else {
-                const error = {
-                    ru: "Я этого еще не знаю, но Abdugani скоро научит меня!",
-                    uz: "Buni hali bilmayman, lekin Abdugani yaqinda o'rgatadi!",
-                    en: "I don't know this yet, but Abdugani will teach me soon!"
-                };
-                answer = error[currentLang];
-            }
-        }
-
-        out.style.display = "block";
-        out.innerText = answer;
-
-        synth.cancel();
-        const utterThis = new SpeechSynthesisUtterance(answer);
-        const selectedVoiceName = voiceSelect.selectedOptions[0]?.getAttribute('data-name');
-        const voice = voices.find(v => v.name === selectedVoiceName);
-        if (voice) utterThis.voice = voice;
-        synth.speak(utterThis);
-    }
+        out.style.display = "block";
+        
+        // Математика
+        try {
+            if(/[0-9]/.test(val) && /[+*/-]/.test(val)) {
+                out.innerText = "Результат: " + eval(val);
+            } else {
+                out.innerText = "Ты написал: " + val + ". Мой создатель Абдугани скоро научит меня отвечать на это!";
+            }
+        } catch(e) {
+            out.innerText = "Я тебя понял: " + val;
+        }
+    }
 </script>
+
 </body>
 </html>
