@@ -3,85 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI Pro Max 3 - Universal</title>
+    <title>Abdugani AI Pro Max 3 - Galactic Defender</title>
     <style>
-        :root { --blue: #4285f4; --gold: #ffd700; --bg: #0f1012; }
+        :root { --gemini-blue: #4285f4; --gemini-purple: #9b72cb; --bg: #0a0a0c; --card: #1e1f20; --gold: #ffd700; }
         body { margin: 0; background: var(--bg); color: #e3e3e3; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-        .wallet { font-family: monospace; font-size: 10px; color: var(--blue); border: 1px solid #333; padding: 8px 15px; border-radius: 20px; margin-bottom: 20px; }
-        .container { width: 100%; max-width: 650px; text-align: center; margin-top: 30px; }
-        .gemini-title { font-size: 34px; font-weight: bold; margin-bottom: 30px; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .input-wrap { background: #1e1f20; border-radius: 30px; padding: 10px 20px; display: flex; align-items: center; border: 1px solid #333; transition: 0.3s; }
-        .input-wrap:focus-within { border-color: var(--blue); box-shadow: 0 0 15px rgba(66,133,244,0.2); }
+        
+        .wallet-top { margin-top: 15px; font-family: monospace; font-size: 10px; color: var(--gemini-blue); border: 1px solid rgba(66, 133, 244, 0.3); padding: 5px 15px; border-radius: 20px; }
+        
+        .container { width: 95%; max-width: 650px; margin-top: 40px; text-align: center; }
+        
+        .ai-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .search-area { background: var(--card); border-radius: 32px; padding: 8px 20px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        
         input { flex: 1; background: transparent; border: none; color: white; padding: 15px; font-size: 16px; outline: none; }
-        button { background: none; border: none; color: var(--blue); font-size: 26px; cursor: pointer; }
-        #res { margin-top: 30px; text-align: left; padding: 25px; border-radius: 25px; background: rgba(255,255,255,0.03); display: none; line-height: 1.7; border-left: 5px solid var(--blue); animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-        .tag { color: var(--gold); font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        
+        .go-btn { background: none; border: none; cursor: pointer; color: var(--gemini-blue); font-size: 24px; }
+        
+        /* КНОПКА ЗАМОРОЗКИ */
+        .frost-btn {
+            background: linear-gradient(to bottom, #00f2fe, #4facfe);
+            color: white; border: none; padding: 15px 30px; border-radius: 50px;
+            font-weight: bold; font-size: 14px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); text-transform: uppercase;
+            transition: 0.3s; margin-bottom: 20px;
+        }
+        .frost-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px #00f2fe; }
+
+        #output { margin-top: 20px; text-align: left; padding: 25px; border-radius: 24px; background: rgba(255,255,255,0.03); display: none; line-height: 1.7; border-left: 5px solid var(--gemini-blue); }
+
+        /* Экран замерзания */
+        #sky-freeze {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(173, 216, 230, 0.4); backdrop-filter: blur(10px);
+            z-index: 9999; pointer-events: none; justify-content: center; align-items: center; flex-direction: column;
+        }
     </style>
 </head>
 <body>
 
-    <div class="wallet">NODE_ID: 0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
+    <div id="sky-freeze">
+        <h1 style="color: white; text-align: center; font-size: 40px; text-shadow: 0 0 30px blue;">
+            ❄️ НЕБО ЗАМОРОЖЕНО! ❄️<br>
+            🛸 ВРАГИ ИЗ АНДРОМЕДЫ В УЖАСЕ!
+        </h1>
+        <div style="font-size: 100px;">🤖🔫❄️</div>
+    </div>
+
+    <div class="wallet-top">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
 
     <div class="container">
-        <div class="gemini-title">Abdugani AI Pro Max 3</div>
+        <div class="ai-title">Abdugani AI Pro Max 3</div>
         
-        <div class="input-wrap">
-            <input type="text" id="userInput" placeholder="Спроси о чем угодно, посчитай или узнай тайну..." onkeypress="if(event.key==='Enter') ask()">
-            <button onclick="ask()">✦</button>
+        <!-- Твоя новая супер-кнопка -->
+        <button class="frost-btn" onclick="fireFrostGun()">⚡ ОГОНЬ ПО АНДРОМЕДЕ ⚡</button>
+
+        <div class="search-area">
+            <input type="text" id="query" placeholder="Спроси, посчитай или найди человека..." onkeypress="if(event.key==='Enter') startSearch()">
+            <button class="go-btn" onclick="startSearch()">✦</button>
         </div>
 
-        <div id="res"></div>
+        <div id="output"></div>
     </div>
 
 <script>
-    async function ask() {
-        const input = document.getElementById('userInput');
-        const box = document.getElementById('res');
-        const q = input.value.trim();
-        if (!q) return;
+    // ФУНКЦИЯ ЗАМОРОЗКИ
+    function fireFrostGun() {
+        alert("БА-БАХ! 💥 Ты поднял специальный автомат и выстрелил в небо!");
+        const sky = document.getElementById('sky-freeze');
+        sky.style.display = 'flex';
+        
+        setTimeout(() => {
+            sky.style.display = 'none';
+            alert("Инопланетяне испугались и замерзли. Галактика спасена! 😎");
+        }, 4000);
+    }
+
+    // ФУНКЦИЯ ПОИСКА И РАСЧЕТА
+    async function startSearch() {
+        const input = document.getElementById('query');
+        const box = document.getElementById('output');
+        const val = input.value.trim();
+        if (!val) return;
 
         box.style.display = "block";
-        box.innerHTML = "<i>Синхронизация с глобальным разумом...</i>";
-        const low = q.toLowerCase();
-
-        // 1. МАТЕМАТИКА
-        const mathCheck = q.replace(/,/g, '.').match(/^[0-9+\-*/().\s^%]+$/);
-        if (mathCheck && /[0-9]/.test(q)) {
+        box.innerHTML = "<i>Abdugani AI сканирует реальность...</i>";
+        
+        // 1. Математика
+        const mathCheck = val.replace(/,/g, '.').match(/^[0-9+\-*/().\s^%]+$/);
+        if (mathCheck && /[0-9]/.test(val)) {
             try {
-                const result = eval(q.replace(/\^/g, '**'));
-                box.innerHTML = `<span class="tag">Математический модуль</span><div style="font-size:30px; color:var(--gold)">${result}</div>`;
+                const res = eval(val.replace(/\^/g, '**'));
+                box.innerHTML = `<b style="color:var(--gold)">Результат:</b> <span style="font-size:22px">${res}</span>`;
                 input.value = ""; return;
             } catch(e) {}
         }
 
-        // 2. СЕКРЕТЫ ВСЕГО НА СВЕТЕ И ПИРАМИДЫ
-        if (low.includes("секрет") || low.includes("смысл жизни") || low.includes("тайн")) {
-            box.innerHTML = `<span class="tag">Высшее знание</span><div style="font-size:40px">🔮</div>Секрет всего на свете заключается в гармонии чисел и энергии. Смысл в том, чтобы созидать. А число 42 — лишь одна из версий ответа...`;
-            input.value = ""; return;
-        }
-        if (low.includes("пирамид")) {
-            box.innerHTML = `<span class="tag">Древние тайны</span><div style="font-size:40px">📐</div>Пирамиды — это величайшие инженерные сооружения, ориентированные по звездам. Они были построены как порталы в вечность и хранилища знаний древних цивилизаций.`;
-            input.value = ""; return;
-        }
-
-        // 3. ПРИВЕТСТВИЕ
-        if (low === "привет" || low === "салом") {
-            box.innerHTML = "<b>Abdugani AI:</b> Приветствую! Я готов. Могу посчитать сложный пример, найти биографию знаменитости или рассказать о тайнах мира.";
-            input.value = ""; return;
-        }
-
-        // 4. ИНТЕРНЕТ (Знаменитости и факты)
+        // 2. Интернет поиск
         try {
-            const r = await fetch(`https://wikipedia.org{encodeURIComponent(q)}?origin=*`);
+            const r = await fetch(`https://wikipedia.org{encodeURIComponent(val)}?origin=*`);
             const d = await r.json();
             if (d.extract) {
-                box.innerHTML = `<span class="tag">База знаний интернета</span><h2 style="color:var(--blue); margin:0 0 10px 0;">${d.title}</h2>${d.extract}`;
+                box.innerHTML = `<h2 style="color:var(--gemini-blue); margin-top:0;">${d.title}</h2>${d.extract}`;
             } else {
-                box.innerHTML = "Я искал в сети, но ничего точного не нашел. Попробуй спросить про конкретного человека или город.";
+                box.innerHTML = "В базе данных нет ответа. Попробуй уточнить запрос!";
             }
-        } catch (err) {
-            box.innerHTML = "Ошибка связи. Мой модуль интернета временно недоступен.";
+        } catch (e) {
+            box.innerHTML = "Ошибка связи с интернетом.";
         }
         input.value = "";
     }
