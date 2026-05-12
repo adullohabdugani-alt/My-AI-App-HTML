@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Auto Edition</title>
+    <title>Abdugani AI - 10 Chances</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
@@ -14,10 +14,7 @@
         input { width: 100%; padding: 15px; border-radius: 25px; border: 1px solid var(--blue); background: rgba(0,0,0,0.3); color: white; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
         .go { width: 100%; padding: 16px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
         .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; max-height: 250px; overflow-y: auto; }
-        
-        /* Пэйволл без кнопок */
         #payWall { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a12; z-index: 999; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; }
-        .timer-text { font-size: 36px; color: var(--blue); font-family: monospace; margin: 20px 0; text-shadow: 0 0 15px var(--blue); }
     </style>
 </head>
 <body>
@@ -37,11 +34,10 @@
     <div class="out" id="res"></div>
 
     <div id="payWall">
-        <h2 style="color:#ff3333; margin:0; letter-spacing: 2px;">ЛИМИТ ИСЧЕРПАН</h2>
+        <h2 style="color:#ff3333; margin:0;">ЛИМИТ ИСЧЕРПАН</h2>
         <div style="font-size:32px; margin:15px 0;">$5,000</div>
-        <p style="font-size:14px; color:#555;">Доступ откроется автоматически через:</p>
-        <div id="timeLeft" class="timer-text">01:00:00</div>
-        
+        <p style="font-size:14px; color:#555;">Авто-разблокировка через 1 час:</p>
+        <div id="timeLeft" style="font-size:32px; color:var(--blue); font-family:monospace; margin:10px 0;">01:00:00</div>
         <div style="background:#000; padding:12px; border-radius:15px; font-size:10px; color:var(--blue); border:1px dashed var(--blue); word-break:break-all; width:90%;" onclick="copyW()">
             0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76
         </div>
@@ -49,32 +45,36 @@
 </div>
 
 <script>
+    // ПРИНУДИТЕЛЬНЫЙ СБРОС ПРИ ЗАПУСКЕ (чтобы всегда было 10)
+    localStorage.setItem('abdugani_qCount', 0);
+    localStorage.removeItem('blockTime');
+
     let curL = 'ru';
-    let qCount = parseInt(localStorage.getItem('abdugani_qCount') || 0);
+    let qCount = 0;
     const maxQ = 10;
 
-    // Главный цикл: время и авто-разблокировка
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-        
-        const blockTime = localStorage.getItem('blockTime');
-        if (blockTime) {
-            const diff = blockTime - new Date().getTime();
+        checkTime();
+    }, 1000);
+
+    function checkTime() {
+        const blockUntil = localStorage.getItem('blockTime');
+        if (blockUntil) {
+            const diff = blockUntil - new Date().getTime();
             if (diff > 0) {
                 document.getElementById('payWall').style.display = 'flex';
                 let m = Math.floor(diff / 60000);
                 let s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('timeLeft').innerText = `${m < 10 ? '0'+m : m}м ${s < 10 ? '0'+s : s}с`;
+                document.getElementById('timeLeft').innerText = `${m}м ${s}с`;
             } else {
-                // ВРЕМЯ ВЫШЛО - ОТКРЫВАЕМ САМИ
                 localStorage.removeItem('blockTime');
-                localStorage.setItem('abdugani_qCount', 0);
                 qCount = 0;
                 document.getElementById('payWall').style.display = 'none';
                 document.getElementById('counter').innerText = "Шансов: 10";
             }
         }
-    }, 1000);
+    }
 
     function setL(l, b) {
         curL = l;
@@ -84,7 +84,7 @@
 
     function copyW() {
         navigator.clipboard.writeText("0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76");
-        alert("Адрес кошелька скопирован!");
+        alert("Кошелек скопирован!");
     }
 
     async function runAI() {
@@ -94,36 +94,35 @@
         if (!val || qCount >= maxQ) return;
 
         qCount++;
-        localStorage.setItem('abdugani_qCount', qCount);
         document.getElementById('counter').innerText = "Шансов: " + (maxQ - qCount);
         out.style.display = "block";
         out.innerText = "Думаю...";
 
-        let low = val.toLowerCase();
-        if (low === "привет" || low === "hello" || low === "salom") {
+        // Приветствия
+        if (["привет", "hello", "salom"].includes(val.toLowerCase())) {
             out.innerText = "Привет, здравствуйте! Как ваши дела?";
             input.value = ""; return;
         }
 
-        let calcExpr = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/');
-        if (/^[0-9+\-*/().\s*]+$/.test(calcExpr) && /[0-9]/.test(calcExpr)) {
-            try { out.innerText = "Результат: " + eval(calcExpr); input.value = ""; return; } catch(e) {}
+        // Математика (1x1, 2+2 и т.д.)
+        let calc = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/');
+        if (/^[0-9+\-*/().\s*]+$/.test(calc) && /[0-9]/.test(calc)) {
+            try { out.innerText = "Результат: " + eval(calc); input.value = ""; return; } catch(e) {}
         }
 
+        // Интернет (Википедия)
         try {
             const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
             const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
             const d = await r.json();
             out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Ничего не найдено.";
-        } catch(e) { out.innerText = "Ошибка сети."; }
-        
+        } catch(e) { out.innerText = "Ошибка поиска."; }
+
         if (qCount >= maxQ) {
             localStorage.setItem('blockTime', new Date().getTime() + 3600000);
         }
-        input.value = ""; 
+        input.value = "";
     }
-
-    document.getElementById('counter').innerText = "Шансов: " + (maxQ - qCount);
 </script>
 </body>
 </html>
