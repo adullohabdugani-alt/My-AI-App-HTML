@@ -3,133 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Developer Edition</title>
+    <title>Abdugani AI - Search Edition</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
-        body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
-        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; overflow: hidden; }
+        body { margin: 0; background: var(--dark); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
+        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); }
         .row { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        .btn-l { background: transparent; border: 1px solid var(--blue); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; }
+        .btn-l { background: transparent; border: 1px solid var(--blue); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
-        input { width: 100%; padding: 15px; border-radius: 25px; border: none; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        .go { width: 100%; padding: 16px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
-        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; font-family: monospace; white-space: pre-wrap; font-size: 14px; }
-        #payWall { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a12; z-index: 10; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; border: 2px solid var(--purple); }
-        .wallet-box { background: #000; padding: 10px; border-radius: 10px; font-size: 10px; color: var(--blue); margin: 15px 0; cursor: pointer; word-break: break-all; border: 1px dashed var(--blue); }
+        input { width: 100%; padding: 15px; border-radius: 25px; border: 1px solid rgba(0,242,254,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        input:focus { border-color: var(--purple); }
+        .go { width: 100%; padding: 16px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; transition: transform 0.2s; }
+        .go:active { transform: scale(0.98); }
+        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; font-size: 14px; max-height: 300px; overflow-y: auto; }
+        .loading { display: none; color: var(--blue); font-style: italic; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div style="color:var(--blue); margin-bottom:10px; font-family:monospace;" id="clock">00:00:00</div>
-    <div id="counter" style="font-size: 12px; color: #ccc; margin-bottom: 10px;">Шансов осталось: 10</div>
-
+    <div style="color:var(--blue); margin-bottom:10px; font-family:monospace; letter-spacing: 2px;" id="clock">00:00:00</div>
+    
     <div class="row">
         <button class="btn-l active" onclick="setL('ru', this)">RU</button>
         <button class="btn-l" onclick="setL('uz', this)">UZ</button>
         <button class="btn-l" onclick="setL('en', this)">EN</button>
     </div>
 
-    <input type="text" id="uIn" placeholder="Спроси меня или попроси код...">
-    <button class="go" onclick="runAI()">GO</button>
+    <input type="text" id="uIn" placeholder="Что найти в интернете?">
+    <div id="loader" class="loading">Ищу информацию...</div>
+    <button class="go" onclick="searchInternet()">ПОИСК</button>
+    
     <div class="out" id="res"></div>
-
-    <div id="payWall">
-        <div style="color:#ff3333; font-weight:bold; font-size:20px;">ЛИМИТ ИСЧЕРПАН</div>
-        <p>Для VIP доступа (5 000$) отправьте USDC (BEP20) на кошелек:</p>
-        <div class="wallet-box" onclick="copyW()">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
-    </div>
 </div>
 
 <script>
     let curL = 'ru';
-    let qCount = 0;
-    const maxQ = 10;
-
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
     function setL(l, b) {
         curL = l;
         document.querySelectorAll('.btn-l').forEach(btn => btn.classList.remove('active'));
         b.classList.add('active');
+        document.getElementById('uIn').placeholder = l === 'ru' ? "Что найти в интернете?" : (l === 'uz' ? "Internetdan nima izlaymiz?" : "Search anything...");
     }
 
-    function copyW() {
-        navigator.clipboard.writeText("0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76");
-        alert("Адрес скопирован!");
-    }
-
-    const brain = {
-        "ru": {
-            "привет": "Привет! Я Abdugani AI. Как твои дела?",
-            "как ты": "Я в отличном настроении! Готов писать код и отвечать на вопросы.",
-            "код": "Вот пример кода для кнопки на HTML:\n<button style='background: blue; color: white;'>Нажми меня</button>",
-            "наполеон": "Наполеон Бонапарт — великий полководец и император Франции.",
-            "темур": "Амир Темур — основатель великой империи Тимуридов.",
-            "ибн сино": "Абу Али ибн Сино — отец медицины и великий ученый.",
-            "пирамид": "Пирамиды — чудо инженерии древнего мира.",
-            "эйнштейн": "Альберт Эйнштейн — гений, открывший теорию относительности."
-        },
-        "uz": {
-            "salom": "Salom! Men Abdugani AI. Ishlaringiz yaxshimi?",
-            "qandaysan": "Men juda yaxshiman! Kod yozishga va savollarga javob berishga tayyorman.",
-            "kod": "Mana HTML tugmasi uchun kod misoli:\n<button style='background: green; color: white;'>Meni bos</button>",
-            "napoleon": "Napoleon Bonapart — buyuk sarkarda va imperator.",
-            "temur": "Amir Temur — buyuk sarkarda va qudratli saltanat asoschisi.",
-            "ibn sino": "Abu Ali ibn Sino — tabobat ilmining sultoni va buyuk olim.",
-            "exrom": "Exromlar — qadimgi dunyoning eng buyuk mo'jizasi.",
-            "eynshteyn": "Albert Eynshteyn — nisbiylik nazariyasi asoschisi."
-        },
-        "en": {
-            "hello": "Hello! I am Abdugani AI. How can I help you?",
-            "how are you": "I'm doing great! Ready to write code for you.",
-            "code": "Here is an HTML button code example:\n<button style='color: red;'>Click me</button>",
-            "napoleon": "Napoleon Bonaparte was a great French military leader.",
-            "temur": "Amir Temur was a great conqueror and founder of an empire.",
-            "avicenna": "Ibn Sina (Avicenna) was a legendary physician and scholar.",
-            "pyramid": "Pyramids are a masterpiece of ancient engineering.",
-            "einstein": "Albert Einstein was a genius physicist."
-        }
-    };
-
-    function runAI() {
-        const val = document.getElementById('uIn').value.toLowerCase().trim();
+    async function searchInternet() {
+        const query = document.getElementById('uIn').value.trim();
         const out = document.getElementById('res');
-        if (!val) return;
+        const loader = document.getElementById('loader');
 
-        if (qCount >= maxQ) {
-            document.getElementById('payWall').style.display = 'flex';
-            return;
-        }
+        if (!query) return;
 
-        qCount++;
-        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
+        // Показываем загрузку
+        loader.style.display = "block";
+        out.style.display = "none";
 
-        let ans = "";
-        let found = false;
-        
-        // Поиск по ключевым словам
-        for (let k in brain[curL]) {
-            if (val.includes(k)) {
-                ans = brain[curL][k];
-                found = true; break;
+        try {
+            /* 
+               ВНИМАНИЕ: Для реального поиска используется API. 
+               Здесь используется DuckDuckGo (бесплатный и простой способ для примера)
+            */
+            const response = await fetch(`https://duckduckgo.com{encodeURIComponent(query)}&format=json&pretty=1&no_html=1`);
+            const data = await response.json();
+
+            let text = "";
+            if (data.AbstractText) {
+                text = data.AbstractText;
+            } else if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                text = data.RelatedTopics[0].Text;
+            } else {
+                text = curL === 'ru' ? "К сожалению, я ничего не нашел по этому запросу." : "Hech narsa topilmadi.";
             }
-        }
 
-        if (!found) {
-            try {
-                // Если есть цифры — считаем
-                if (/[0-9]/.test(val)) { 
-                    ans = (curL==='en'?"Result: ":(curL==='uz'?"Natija: ":"Результат: ")) + eval(val.replace(/[^-0-9+*/.]/g, '')); 
-                } else { 
-                    ans = curL==='en'?"I'm learning this! Ask Abdugani.":(curL==='uz'?"Buni o'rganyapman. Abduganidan so'rang.":"Я учусь этому! Спроси Абдугани."); 
-                }
-            } catch { ans = "Error"; }
+            out.innerText = text;
+            out.style.display = "block";
+        } catch (error) {
+            out.innerText = "Ошибка соединения с интернетом.";
+            out.style.display = "block";
+        } finally {
+            loader.style.display = "none";
         }
-
-        out.style.display = "block";
-        out.innerText = ans;
-        document.getElementById('uIn').value = "";
     }
 </script>
 </body>
