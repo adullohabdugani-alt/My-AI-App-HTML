@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI</title>
+    <title>Abdugani AI - Исправленная версия</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
@@ -20,9 +20,8 @@
 <body>
 
 <div class="card">
-    <!-- СЕКРЕТ: Нажми дважды на часы, чтобы сбросить лимит -->
-    <div style="color:var(--blue); margin-bottom:10px; font-family:monospace; cursor:pointer;" id="clock" ondblclick="unlockCreator()">00:00:00</div>
-    <div id="counter" style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Шансов: 10</div>
+    <div style="color:var(--blue); margin-bottom:10px; font-family:monospace;" id="clock">00:00:00</div>
+    <div id="counter" style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Шансов осталось: 10</div>
     
     <div class="row">
         <button class="btn-l active" onclick="setL('ru', this)">RU</button>
@@ -37,41 +36,21 @@
     <div id="payWall">
         <div style="color:#ff3333; font-weight:bold; font-size:22px;">ЛИМИТ ИСЧЕРПАН</div>
         <div style="font-size:30px; margin:10px 0;">$5,000</div>
-        <p style="font-size:14px;">Отправьте оплату на кошелек или ждите 1 час:</p>
+        <p style="font-size:14px;">Для VIP доступа отправьте USDC (BEP20) на кошелек:</p>
         <div style="background:#000; padding:10px; border-radius:10px; font-size:10px; color:var(--blue); margin:15px 0; border:1px dashed var(--blue); word-break:break-all; width:90%;" onclick="copyW()">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
-        <div id="timeLeft" style="color:var(--blue); font-family:monospace;"></div>
+        <button class="btn-l" onclick="location.reload()" style="margin-top:10px;">Обновить</button>
     </div>
 </div>
 
 <script>
     let curL = 'ru';
-    let qCount = parseInt(localStorage.getItem('qCount') || 0);
+    let qCount = 0; // Сбросили счетчик
     const maxQ = 10;
 
-    // Обновление времени и проверка блокировки
+    // Только время
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-        const blockUntil = localStorage.getItem('blockUntil');
-        if (blockUntil) {
-            const diff = blockUntil - new Date().getTime();
-            if (diff > 0) {
-                document.getElementById('payWall').style.display = 'flex';
-                let m = Math.floor(diff / 60000);
-                let s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('timeLeft').innerText = `Ждать: ${m}м ${s}с`;
-            } else {
-                unlockCreator();
-            }
-        }
     }, 1000);
-
-    function unlockCreator() {
-        localStorage.removeItem('blockUntil');
-        localStorage.setItem('qCount', 0);
-        qCount = 0;
-        document.getElementById('payWall').style.display = 'none';
-        document.getElementById('counter').innerText = "Шансов: 10";
-    }
 
     function setL(l, b) {
         curL = l;
@@ -81,7 +60,7 @@
 
     function copyW() {
         navigator.clipboard.writeText("0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76");
-        alert("Скопировано!");
+        alert("Кошелек скопирован!");
     }
 
     async function runAI() {
@@ -89,23 +68,27 @@
         const out = document.getElementById('res');
         if (!val) return;
 
-        if (qCount >= maxQ) return;
+        // Если лимит достигнут — показываем окно оплаты
+        if (qCount >= maxQ) {
+            document.getElementById('payWall').style.display = 'flex';
+            return;
+        }
 
-        qCount++;
-        localStorage.setItem('qCount', qCount);
-        document.getElementById('counter').innerText = "Шансов: " + (maxQ - qCount);
+        qCount++; // Тратим шанс только при нажатии
+        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
         out.style.display = "block";
-        out.innerText = "Ищу...";
+        out.innerText = "Думаю...";
+
+        let lowVal = val.toLowerCase();
 
         // 1. Приветствия
-        let lowVal = val.toLowerCase();
         if (lowVal === "привет" || lowVal === "hello" || lowVal === "salom") {
             const hi = {ru:"Привет, здравствуйте! Как дела?", en:"Hello! How are you?", uz:"Salom! Ishlaringiz qalay?"};
             out.innerText = hi[curL];
             return;
         }
 
-        // 2. Математика (обрабатываем 1x1, 2*2 и т.д.)
+        // 2. Математика
         let calcExpr = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
         if (/^[0-9+\-*/().\s*]+$/.test(calcExpr) && /[0-9]/.test(calcExpr)) {
             try {
@@ -114,20 +97,16 @@
             } catch(e) {}
         }
 
-        // 3. Википедия
+        // 3. Интернет (Википедия)
         const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
         try {
             const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
             const d = await r.json();
-            out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Ничего не найдено.";
+            out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Ничего не найдено в интернете.";
         } catch(e) {
-            out.innerText = "Ошибка поиска.";
+            out.innerText = "Ошибка поиска. Проверь интернет!";
         }
-
-        if (qCount >= maxQ) localStorage.setItem('blockUntil', new Date().getTime() + 3600000);
     }
-    
-    document.getElementById('counter').innerText = "Шансов: " + (maxQ - qCount);
 </script>
 </body>
 </html>
