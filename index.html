@@ -3,113 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI Pro Max 3 - Gaming Edition</title>
+    <title>Abdugani AI Pro Max 3 - Ultimate</title>
     <style>
-        :root { --blue: #4285f4; --purple: #9b72cb; --bg: #0a0a0c; --card: #1e1f20; --green: #00ff88; }
-        body { margin: 0; background: var(--bg); color: #e3e3e3; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        :root { --blue: #00d2ff; --purple: #9d00ff; --dark: #050505; --gold: #ffd700; }
+        body { margin: 0; background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
         
-        .wallet-top { margin-top: 15px; font-family: monospace; font-size: 10px; color: var(--blue); border: 1px solid rgba(66, 133, 244, 0.3); padding: 5px 15px; border-radius: 20px; }
-        
-        .container { width: 95%; max-width: 650px; margin-top: 40px; text-align: center; }
-        
-        .ai-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; background: linear-gradient(90deg, #4285f4, #9b72cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* КНОПКА СИСТЕМА ИГР */
-        .game-btn {
-            background: linear-gradient(45deg, #00ff88, #0088ff);
-            color: black; border: none; padding: 15px 35px; border-radius: 50px;
-            font-weight: bold; font-size: 14px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); text-transform: uppercase;
-            transition: 0.3s; margin-bottom: 25px; display: inline-flex; align-items: center; gap: 10px;
+        /* КРИПТО-ПАНЕЛЬ СВЕРХУ */
+        .crypto-header {
+            width: 100%; max-width: 500px; background: rgba(0, 210, 255, 0.1);
+            border: 1px solid var(--blue); padding: 15px; border-radius: 20px;
+            margin-bottom: 30px; text-align: center; backdrop-filter: blur(10px);
         }
-        .game-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--green); }
-
-        .search-area { background: var(--card); border-radius: 32px; padding: 8px 20px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .wallet-addr { font-family: monospace; font-size: 11px; color: var(--blue); word-break: break-all; }
         
-        input { flex: 1; background: transparent; border: none; color: white; padding: 15px; font-size: 16px; outline: none; }
-        
-        .go-btn { background: none; border: none; cursor: pointer; color: var(--blue); font-size: 24px; }
-        
-        #output { margin-top: 20px; text-align: left; padding: 25px; border-radius: 24px; background: rgba(255,255,255,0.03); display: none; line-height: 1.7; border-left: 5px solid var(--blue); }
-
-        /* Игровое окно */
-        #game-center {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 10000; flex-direction: column;
+        .main-card {
+            width: 95%; max-width: 550px; background: rgba(20, 20, 25, 0.9);
+            border-radius: 40px; padding: 35px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 50px rgba(0,0,0,1); text-align: center;
         }
-        .game-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; }
-        iframe { width: 100%; height: 100%; border: none; }
+
+        .ai-avatar { font-size: 70px; margin-bottom: 10px; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { filter: drop-shadow(0 0 10px var(--blue)); } to { filter: drop-shadow(0 0 25px var(--purple)); } }
+
+        h1 { font-size: 28px; margin: 0; font-weight: 900; background: linear-gradient(90deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .version { color: var(--gold); font-size: 14px; font-weight: bold; letter-spacing: 5px; display: block; margin-bottom: 30px; }
+
+        .search-box { background: #15151a; border-radius: 25px; padding: 5px 20px; display: flex; align-items: center; border: 1px solid #333; margin-bottom: 20px; }
+        input { flex: 1; background: transparent; border: none; color: white; padding: 18px; font-size: 16px; outline: none; }
+        .search-btn { background: none; border: none; cursor: pointer; color: var(--blue); font-size: 24px; }
+
+        #output {
+            margin-top: 25px; text-align: left; padding: 25px; border-radius: 25px;
+            background: rgba(255,255,255,0.03); display: none; line-height: 1.7;
+            border-left: 5px solid var(--purple); animation: slideIn 0.4s;
+        }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .tag { background: var(--blue); color: black; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 5px; margin-bottom: 10px; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <!-- Игровой Центр -->
-    <div id="game-center">
-        <div class="game-header">
-            <span style="font-weight: bold; color: var(--green);">ЛУЧШИЕ ИГРЫ ОНЛАЙН</span>
-            <button onclick="closeGames()" style="background: red; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">ВЕРНУТЬСЯ К АИ</button>
-        </div>
-        <!-- Платформа с тысячами лучших игр (Poki) -->
-        <iframe src="https://poki.com" id="game-frame"></iframe>
+    <div class="crypto-header">
+        <div style="font-size: 12px; margin-bottom: 5px; color: var(--gold); font-weight: bold;">ACTIVE WALLET NODE</div>
+        <div class="wallet-addr">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
     </div>
 
-    <div class="wallet-top">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
+    <div class="main-card">
+        <div id="ai-icon" class="ai-avatar">🤖</div>
+        <h1>Abdugani AI</h1>
+        <span class="version">PRO MAX 3</span>
 
-    <div class="container">
-        <div class="ai-title">Abdugani AI Pro Max 3</div>
-        
-        <!-- Твоя новая Система Игр -->
-        <button class="game-btn" onclick="openGames()">🎮 СИСТЕМА ИГР</button>
-
-        <div class="search-area">
-            <input type="text" id="query" placeholder="Спроси, посчитай или найди человека..." onkeypress="if(event.key==='Enter') startSearch()">
-            <button class="go-btn" onclick="startSearch()">✦</button>
+        <div class="search-box">
+            <input type="text" id="userInput" placeholder="Спроси, посчитай или найди знаменитость..." onkeypress="if(event.key==='Enter') startAI()">
+            <button class="search-btn" onclick="startAI()">✦</button>
         </div>
 
         <div id="output"></div>
     </div>
 
 <script>
-    function openGames() {
-        document.getElementById('game-center').style.display = 'flex';
-    }
-    function closeGames() {
-        document.getElementById('game-center').style.display = 'none';
-    }
-
-    async function startSearch() {
-        const input = document.getElementById('query');
+    async function startAI() {
+        const input = document.getElementById('userInput');
         const box = document.getElementById('output');
+        const icon = document.getElementById('ai-icon');
         const val = input.value.trim();
+        
         if (!val) return;
 
         box.style.display = "block";
-        box.innerHTML = "<i>Abdugani AI анализирует сеть...</i>";
-        
-        // Математика
+        box.innerHTML = "<i>Анализирую глобальные данные...</i>";
+        icon.innerText = "🌀";
+
+        const low = val.toLowerCase();
+
+        // 1. МАТЕМАТИЧЕСКИЙ МОЗГ
         const mathCheck = val.replace(/,/g, '.').match(/^[0-9+\-*/().\s^%]+$/);
         if (mathCheck && /[0-9]/.test(val)) {
             try {
                 const res = eval(val.replace(/\^/g, '**'));
-                box.innerHTML = `<b style="color:var(--green)">Результат:</b> <span style="font-size:22px">${res}</span>`;
+                setTimeout(() => {
+                    icon.innerText = "🔢";
+                    box.innerHTML = `<span class="tag">ВЫЧИСЛЕНИЕ</span><br><div style="font-size:30px; color:var(--gold);">${res}</div>`;
+                }, 400);
                 input.value = ""; return;
             } catch(e) {}
         }
 
-        // Поиск
+        // 2. ИНТЕРНЕТ ПОИСК (Люди и Факты)
         try {
             const r = await fetch(`https://wikipedia.org{encodeURIComponent(val)}?origin=*`);
             const d = await r.json();
+            
             if (d.extract) {
-                box.innerHTML = `<h2 style="color:var(--blue); margin:0 0 10px 0;">${d.title}</h2>${d.extract}`;
+                icon.innerText = "🧐";
+                box.innerHTML = `
+                    <span class="tag">ИНФОРМАЦИЯ ИЗ СЕТИ</span>
+                    <h2 style="color:var(--blue); margin-top:0;">${d.title}</h2>
+                    <div>${d.extract}</div>
+                `;
             } else {
-                box.innerHTML = "Информация не найдена. Попробуй другой запрос!";
+                icon.innerText = "🤖";
+                box.innerHTML = "В моей базе знаний нет точного ответа. Попробуй уточнить запрос (например: Илон Маск).";
             }
         } catch (e) {
-            box.innerHTML = "Ошибка связи с интернетом.";
+            icon.innerText = "⚠️";
+            box.innerHTML = "Ошибка связи. Проверь интернет.";
         }
         input.value = "";
     }
 </script>
+
 </body>
 </html>
