@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Wallet Edition</title>
+    <title>Abdugani AI</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
-        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,242,254,0.2); }
+        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; overflow: hidden; }
         .row { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
         .btn-l { background: transparent; border: 1px solid var(--blue); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; }
         .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
@@ -20,16 +20,14 @@
             background: #0a0a12; z-index: 999; flex-direction: column; justify-content: center; 
             align-items: center; padding: 25px; text-align: center; box-sizing: border-box;
         }
-        .price { color: #ff3333; font-size: 32px; font-weight: bold; margin: 10px 0; }
-        .wallet-box { background: #000; padding: 12px; border-radius: 10px; font-size: 10px; color: var(--blue); margin: 15px 0; cursor: pointer; border: 1px dashed var(--blue); word-break: break-all; width: 100%; }
-        .timer { color: var(--blue); font-family: monospace; font-size: 18px; margin-top: 10px; }
+        .wallet-box { background: #000; padding: 12px; border-radius: 10px; font-size: 10px; color: var(--blue); margin: 15px 0; border: 1px dashed var(--blue); cursor: pointer; word-break: break-all; width: 90%; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div style="color:var(--blue); margin-bottom:10px; font-family:monospace;" id="clock">00:00:00</div>
-    <div id="counter" style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Шансов осталось: 10</div>
+    <div id="counter" style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Шансов осталось: 10</div>
     
     <div class="row">
         <button class="btn-l active" onclick="setL('ru', this)">RU</button>
@@ -42,28 +40,27 @@
     <div class="out" id="res"></div>
 
     <div id="payWall">
-        <div style="color:#ff3333; font-weight:bold; font-size:20px;">ЛИМИТ ИСЧЕРПАН</div>
-        <div class="price">$5,000</div>
-        <p style="font-size:13px;">Для VIP доступа отправьте USDC (BEP20) на кошелек или подождите час:</p>
+        <div style="color:#ff3333; font-weight:bold; font-size:22px;">ЛИМИТ ИСЧЕРПАН</div>
+        <div style="font-size:30px; margin:10px 0;">$5,000</div>
+        <p style="font-size:14px;">Для VIP доступа отправьте USDC (BEP20) на кошелек или ждите 1 час:</p>
         <div class="wallet-box" onclick="copyW()">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
-        <div class="timer" id="timeLeft">01:00:00</div>
-        <button class="btn-l" onclick="location.reload()" style="margin-top:20px;">Проверить статус</button>
+        <div id="timeLeft" style="color:var(--blue); font-family:monospace; margin-top:10px;"></div>
     </div>
 </div>
 
 <script>
     let curL = 'ru';
-    let qCount = localStorage.getItem('abdu_qCount') || 0;
+    let qCount = localStorage.getItem('qCount') || 0;
     const maxQ = 10;
-    const myWallet = "0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76";
+    const lockTime = 60 * 60 * 1000;
 
     setInterval(() => { 
         document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
-        updateUI();
+        checkLock(); 
     }, 1000);
 
-    function updateUI() {
-        const blockUntil = localStorage.getItem('abdu_blockUntil');
+    function checkLock() {
+        const blockUntil = localStorage.getItem('blockUntil');
         if (blockUntil) {
             const diff = blockUntil - new Date().getTime();
             if (diff > 0) {
@@ -72,13 +69,12 @@
                 let s = Math.floor((diff / 1000) % 60);
                 document.getElementById('timeLeft').innerText = `Разблокировка через: ${m}м ${s}с`;
             } else {
-                localStorage.removeItem('abdu_blockUntil');
-                localStorage.setItem('abdu_qCount', 0);
+                localStorage.removeItem('blockUntil');
+                localStorage.setItem('qCount', 0);
                 qCount = 0;
                 document.getElementById('payWall').style.display = 'none';
             }
         }
-        document.getElementById('counter').innerText = "Шансов осталось: " + Math.max(0, maxQ - qCount);
     }
 
     function setL(l, b) {
@@ -88,45 +84,56 @@
     }
 
     function copyW() {
-        navigator.clipboard.writeText(myWallet);
-        alert("Адрес скопирован!");
+        navigator.clipboard.writeText("0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76");
+        alert("Кошелек скопирован!");
     }
 
     async function runAI() {
-        const val = document.getElementById('uIn').value.toLowerCase().trim();
+        let val = document.getElementById('uIn').value.toLowerCase().trim();
         const out = document.getElementById('res');
         if (!val) return;
 
         if (qCount >= maxQ) {
-            if (!localStorage.getItem('abdu_blockUntil')) {
-                localStorage.setItem('abdu_blockUntil', new Date().getTime() + 3600000);
-            }
-            updateUI();
+            localStorage.setItem('blockUntil', new Date().getTime() + lockTime);
+            checkLock();
             return;
         }
 
         qCount++;
-        localStorage.setItem('abdu_qCount', qCount);
-        updateUI();
-
-        // Логика ответов
-        if (val.includes("привет") || val.includes("здравствуй") || val.includes("hello")) {
-            out.innerText = val.includes("hello") ? "Hello! How are you doing?" : "Привет, здравствуйте! Как ваши дела?";
-        } else if (/[0-9]/.test(val) && /[-+*/]/.test(val)) {
-            try { out.innerText = "Результат: " + eval(val.replace(/[^-0-9+*/.]/g, '')); } catch { out.innerText = "Ошибка в расчете"; }
-        } else {
-            out.innerText = "Ищу в интернете...";
-            const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
-            try {
-                const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
-                const d = await r.json();
-                out.innerHTML = d.title ? `<b>${d.title}</b><br>${d.extract}` : "Ничего не найдено.";
-            } catch { out.innerText = "Ошибка поиска."; }
-        }
+        localStorage.setItem('qCount', qCount);
+        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
         out.style.display = "block";
+        out.innerText = "Думаю...";
+
+        // Приветствия
+        if (val === "привет" || val === "hello" || val === "salom") {
+            const hi = {ru:"Привет, здравствуйте! Как дела?", en:"Hello! How are you?", uz:"Salom! Ishlaringiz qalay?"};
+            out.innerText = hi[curL];
+            return;
+        }
+
+        // Математика (заменяем × на * для расчета)
+        let calcVal = val.replace(/×/g, '*').replace(/÷/g, '/');
+        if (/[0-9]/.test(calcVal) && /[-+*/]/.test(calcVal)) {
+            try {
+                out.innerText = "Результат: " + eval(calcVal.replace(/[^-0-9+*/.]/g, ''));
+                return;
+            } catch { }
+        }
+
+        // Интернет
+        const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
+        try {
+            const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
+            if (r.ok) {
+                const d = await r.json();
+                out.innerHTML = `<b>${d.title}</b><br>${d.extract}`;
+            } else { out.innerText = "Ничего не найдено."; }
+        } catch { out.innerText = "Ошибка сети."; }
     }
-    
-    updateUI();
+
+    checkLock();
+    document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
 </script>
 </body>
 </html>
