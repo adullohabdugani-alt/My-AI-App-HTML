@@ -3,112 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI Pro Max 3 - Gemini Online</title>
+    <title>Abdugani AI Pro Max 3</title>
     <style>
-        :root {
-            --gemini-blue: #4285f4;
-            --gemini-purple: #9b72cb;
-            --bg: #131314;
-            --card: #1e1f20;
-        }
-        body {
-            margin: 0; background: var(--bg); color: #e3e3e3;
-            font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
-        .wallet-top {
-            margin-top: 15px; font-family: monospace; font-size: 10px; color: var(--gemini-blue);
-            border: 1px solid rgba(66, 133, 244, 0.3); padding: 5px 15px; border-radius: 20px;
-        }
-        .container { width: 90%; max-width: 700px; margin-top: 60px; text-align: center; }
-        .ai-title {
-            font-size: 36px; font-weight: bold; margin-bottom: 30px;
-            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .search-area {
-            background: var(--card); border-radius: 32px; padding: 8px 20px;
-            display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.3s;
-        }
-        .search-area:focus-within { border-color: var(--gemini-blue); box-shadow: 0 0 15px rgba(66,133,244,0.2); }
-        input {
-            flex: 1; background: transparent; border: none; color: white;
-            padding: 15px; font-size: 16px; outline: none;
-        }
-        .go-btn { background: none; border: none; cursor: pointer; color: var(--gemini-blue); font-size: 24px; }
-        
-        #output {
-            margin-top: 30px; text-align: left; padding: 25px; border-radius: 24px;
-            background: rgba(255,255,255,0.03); display: none; line-height: 1.7;
-            border: 1px solid rgba(255,255,255,0.05); animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-        .status { font-size: 12px; color: #80868b; margin-bottom: 10px; display: block; text-transform: uppercase; }
+        :root { --blue: #4285f4; --bg: #131314; --card: #1e1f20; }
+        body { margin: 0; background: var(--bg); color: #e3e3e3; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        .wallet { font-family: monospace; font-size: 10px; color: var(--blue); margin-bottom: 20px; border: 1px solid rgba(66,133,244,0.3); padding: 5px 15px; border-radius: 20px; }
+        .container { width: 100%; max-width: 600px; text-align: center; margin-top: 40px; }
+        .title { font-size: 32px; font-weight: bold; margin-bottom: 30px; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .search-box { background: var(--card); border-radius: 30px; padding: 5px 20px; display: flex; align-items: center; border: 1px solid #333; }
+        input { flex: 1; background: transparent; border: none; color: white; padding: 15px; font-size: 16px; outline: none; }
+        button { background: none; border: none; color: var(--blue); font-size: 24px; cursor: pointer; }
+        #output { margin-top: 30px; text-align: left; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.03); display: none; line-height: 1.6; border-left: 4px solid var(--blue); }
     </style>
 </head>
 <body>
 
-    <div class="wallet-top">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
+    <div class="wallet">0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
 
     <div class="container">
-        <div class="ai-title">Привет, я Abdugani AI</div>
+        <div class="title">Abdugani AI Pro Max 3</div>
         
-        <div class="search-area">
-            <input type="text" id="query" placeholder="Спроси о знаменитости или любом факте..." onkeypress="if(event.key==='Enter') startSearch()">
-            <button class="go-btn" onclick="startSearch()">✦</button>
+        <div class="search-box">
+            <input type="text" id="query" placeholder="Спроси о человеке или факте...">
+            <button onclick="askAI()">✦</button>
         </div>
 
         <div id="output"></div>
     </div>
 
 <script>
-    async function startSearch() {
+    async function askAI() {
         const input = document.getElementById('query');
         const box = document.getElementById('output');
-        const val = input.value.trim();
+        const q = input.value.trim();
         
-        if (!val) return;
+        if (!q) return;
 
         box.style.display = "block";
-        box.innerHTML = `<span class="status">Анализ сети...</span><div style="font-size:40px">✨</div><i>Abdugani AI Pro Max 3 ищет ответ...</i>`;
+        box.innerHTML = "<i>Ищу информацию в глобальной сети...</i>";
         
-        // Очищаем поле сразу
-        input.value = "";
+        // 1. Проверка на простые слова
+        const low = q.toLowerCase();
+        if (low === "привет" || low === "салом") {
+            box.innerHTML = "<b>Abdugani AI:</b> Привет! Я на связи. Спроси меня о ком-то знаменитом или о любом научном факте.";
+            input.value = ""; return;
+        }
 
         try {
-            // Используем официальное API энциклопедии (без CORS ошибок в 99% случаев)
-            const response = await fetch(`https://wikipedia.org{encodeURIComponent(val)}?origin=*`);
+            // 2. Запрос к Wikipedia API с заголовком origin для обхода CORS
+            const url = `https://wikipedia.org{encodeURIComponent(q)}?origin=*`;
+            const response = await fetch(url);
             
-            if (!response.ok) throw new Error('Сеть не отвечает');
+            if (!response.ok) throw new Error();
             
             const data = await response.json();
 
             if (data.extract) {
-                box.innerHTML = `
-                    <span class="status">Результат из интернета</span>
-                    <h2 style="color:var(--gemini-blue); margin-top:0;">${data.title}</h2>
-                    <div style="font-size: 16px;">${data.extract}</div>
-                    <div style="margin-top:15px; font-size:40px">😎</div>
-                `;
+                box.innerHTML = `<h2 style="color:#4285f4; margin:0 0 10px 0;">${data.title}</h2>${data.extract}`;
             } else {
-                box.innerHTML = `
-                    <span class="status">Поиск завершен</span>
-                    <div style="font-size:40px">🤔</div>
-                    К сожалению, в открытых базах данных нет точного ответа на запрос "<b>${val}</b>". 
-                    Попробуйте ввести имя знаменитости (например: Лионель Месси) или научный термин.
-                `;
+                box.innerHTML = `По запросу "<b>${q}</b>" ничего не найдено. Попробуй ввести имя известного человека (например: <i>Леонардо да Винчи</i>).`;
             }
-        } catch (error) {
-            console.error(error);
-            box.innerHTML = `
-                <span class="status" style="color:#ff4444">Ошибка связи</span>
-                <div style="font-size:40px">📡❌</div>
-                Не удалось подключиться к серверам знаний. <br>
-                <b>Решение:</b> Проверьте интернет или попробуйте сменить запрос.
-            `;
+        } catch (err) {
+            box.innerHTML = "<b>Ошибка:</b> Не удалось получить данные. Попробуй еще раз или проверь подключение к интернету.";
         }
+        input.value = "";
     }
 </script>
-
 </body>
 </html>
