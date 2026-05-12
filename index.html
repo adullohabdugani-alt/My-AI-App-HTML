@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Developer Edition</title>
+    <title>Abdugani AI - Fixed Edition</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
@@ -13,16 +13,15 @@
         .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
         input { width: 100%; padding: 15px; border-radius: 25px; border: 1px solid var(--blue); background: rgba(0,0,0,0.3); color: white; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
         .go { width: 100%; padding: 16px; border-radius: 25px; border: none; background: linear-gradient(45deg, var(--blue), var(--purple)); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
-        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; max-height: 300px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; font-size: 13px; }
+        .out { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 15px; border-left: 4px solid var(--purple); text-align: left; display: none; line-height: 1.6; max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; }
         #payWall { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a12; z-index: 999; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; }
-        .timer-val { font-size: 36px; color: var(--blue); font-family: monospace; margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div style="color:var(--blue); margin-bottom:10px; font-family:monospace;" id="clock">00:00:00</div>
-    <div id="counter" style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Шансов: 10</div>
+    <div id="counter" style="font-size: 13px; color: #aaa; margin-bottom: 15px;">Шансов осталось: 10</div>
     
     <div class="row">
         <button class="btn-l active" onclick="setL('ru', this)">RU</button>
@@ -30,15 +29,15 @@
         <button class="btn-l" onclick="setL('en', this)">EN</button>
     </div>
 
-    <input type="text" id="uIn" placeholder="Напиши код HTML или спроси...">
+    <input type="text" id="uIn" placeholder="Спроси или напиши HTML...">
     <button class="go" onclick="runAI()">GO</button>
     <div class="out" id="res"></div>
 
     <div id="payWall">
         <h2 style="color:#ff3333; margin:0;">ЛИМИТ ИСЧЕРПАН</h2>
-        <div style="font-size:32px; margin:15px 0;">$5,000</div>
-        <p style="font-size:14px; color:#555;">Доступ откроется через:</p>
-        <div id="timeLeft" class="timer-val">01:00:00</div>
+        <div style="font-size:32px; margin:10px 0;">$5,000</div>
+        <p style="font-size:14px; color:#555;">Авто-разблокировка через:</p>
+        <div id="timeLeft" style="font-size:32px; color:var(--blue); font-family:monospace; margin-bottom: 20px;">01:00:00</div>
         <div style="background:#000; padding:12px; border-radius:15px; font-size:10px; color:var(--blue); border:1px dashed var(--blue); word-break:break-all; width:90%;" onclick="copyW()">
             0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76
         </div>
@@ -46,31 +45,34 @@
 </div>
 
 <script>
+    // ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ПАМЯТИ ПРИ ЗАПУСКЕ
+    sessionStorage.clear(); // Очищаем сессию
+    let qCount = 0; // Начинаем с нуля
     let curL = 'ru';
-    if (localStorage.getItem('abdugani_qCount') === null) localStorage.setItem('abdugani_qCount', 0);
-    let qCount = parseInt(localStorage.getItem('abdugani_qCount'));
     const maxQ = 10;
+    let blockEndTime = null;
 
+    // Часы и проверка времени
     setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-        checkTime();
-    }, 1000);
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString();
 
-    function checkTime() {
-        const blockUntil = localStorage.getItem('blockTime');
-        if (blockUntil) {
-            const diff = blockUntil - new Date().getTime();
+        if (blockEndTime) {
+            const diff = blockEndTime - now.getTime();
             if (diff > 0) {
                 document.getElementById('payWall').style.display = 'flex';
-                let m = Math.floor(diff / 60000); let s = Math.floor((diff % 60000) / 1000);
+                let m = Math.floor(diff / 60000);
+                let s = Math.floor((diff % 60000) / 1000);
                 document.getElementById('timeLeft').innerText = `${m}м ${s}с`;
             } else {
-                localStorage.removeItem('blockTime'); localStorage.setItem('abdugani_qCount', 0);
-                qCount = 0; document.getElementById('payWall').style.display = 'none';
-                document.getElementById('counter').innerText = "Шансов: 10";
+                // Время вышло - всё обнуляем
+                blockEndTime = null;
+                qCount = 0;
+                document.getElementById('payWall').style.display = 'none';
+                document.getElementById('counter').innerText = "Шансов осталось: 10";
             }
         }
-    }
+    }, 1000);
 
     function setL(l, b) {
         curL = l;
@@ -87,44 +89,43 @@
         const input = document.getElementById('uIn');
         const out = document.getElementById('res');
         let val = input.value.trim();
-        if (!val || qCount >= maxQ) return;
+        
+        if (!val || blockEndTime) return;
 
         qCount++;
-        localStorage.setItem('abdugani_qCount', qCount);
-        document.getElementById('counter').innerText = "Шансов: " + (maxQ - qCount);
+        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
         out.style.display = "block";
-        out.innerText = "Генерация...";
+        out.innerText = "Думаю...";
 
         let low = val.toLowerCase();
 
-        // --- СПЕЦИАЛЬНЫЙ БЛОК ДЛЯ КОДА ---
-        if (low.includes("код") || low.includes("html") || low.includes("css") || low.includes("button")) {
-            out.innerText = "Вот лучший пример кода для вашего запроса:\n\n" + 
-            "<!DOCTYPE html>\n<html>\n<head>\n <style>\n  .myBtn { background: linear-gradient(45deg, #00f2fe, #9d00ff); color: white; padding: 15px 30px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; }\n </style>\n</head>\n<body>\n <button class='myBtn'>Нажми на меня</button>\n</body>\n</html>";
+        // 1. ПОИСК HTML КОДА
+        if (low.includes("код") || low.includes("html") || low.includes("css")) {
+            out.innerText = "<!-- Пример лучшего HTML кода -->\n<div style='background: linear-gradient(to right, #00f2fe, #9d00ff); padding: 20px; border-radius: 15px; color: white; text-align: center;'>\n  <h1>Abdugani AI</h1>\n  <p>Этот код сгенерирован специально для вас.</p>\n</div>";
         } 
-        // Приветствие
-        else if (["привет", "hello", "salom"].includes(low)) {
-            out.innerText = "Привет, я Abdugani AI! Я могу писать код и искать инфо. Как дела?";
-        } 
-        // Математика
+        // 2. МАТЕМАТИКА
         else {
             let calc = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/');
             if (/^[0-9+\-*/().\s*]+$/.test(calc) && /[0-9]/.test(calc)) {
-                try { out.innerText = "Результат: " + eval(calc); } catch(e) { out.innerText = "Ошибка"; }
+                try { out.innerText = "Результат: " + eval(calc); } catch { out.innerText = "Ошибка в расчете"; }
             } else {
-                // Интернет
-                try {
-                    const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
-                    const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
-                    const d = await r.json();
-                    out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Ничего не найдено.";
-                } catch(e) { out.innerText = "Ошибка сети."; }
+                // 3. ПРИВЕТСТВИЕ И ИНТЕРНЕТ
+                if (["привет", "hello", "salom"].includes(low)) {
+                    out.innerText = "Привет! Я Abdugani AI. Чем могу помочь?";
+                } else {
+                    try {
+                        const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
+                        const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
+                        const d = await r.json();
+                        out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Информация не найдена в интернете.";
+                    } catch { out.innerText = "Ошибка сети."; }
+                }
             }
         }
 
+        // БЛОКИРОВКА ПОСЛЕ 10 ЗАПРОСОВ
         if (qCount >= maxQ) {
-            localStorage.setItem('blockTime', new Date().getTime() + 3600000);
-            setTimeout(() => { checkTime(); }, 2000);
+            blockEndTime = new Date().getTime() + 3600000; // Ровно 1 час
         }
         input.value = "";
     }
