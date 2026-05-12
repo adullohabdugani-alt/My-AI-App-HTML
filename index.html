@@ -3,76 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdugani AI Pro Max 3 - Biography Edition</title>
+    <title>Abdugani AI Pro Max 3 - Online Edition</title>
     <style>
-        :root { --accent: #00f2fe; --gold: #ffd700; --bg: #05070a; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-        
-        .wallet { font-family: monospace; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); padding: 8px; border-radius: 10px; margin-bottom: 20px; background: rgba(0,242,254,0.05); }
+        :root {
+            --bg: #0b0e14;
+            --card: #181c25;
+            --blue: #0088cc;
+            --neon: #00f2fe;
+            --gold: #ffcc00;
+        }
 
-        .card { width: 100%; max-width: 450px; background: #11141d; border-radius: 35px; padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        body {
+            margin: 0; background: var(--bg); color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
+        }
 
-        .robot-sticker { font-size: 80px; margin-bottom: 10px; display: block; animation: float 3s infinite ease-in-out; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .main-container { width: 100%; max-width: 420px; text-align: center; }
 
-        h1 { font-size: 22px; margin: 5px 0; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
-        .ver { color: var(--gold); font-size: 12px; font-weight: bold; letter-spacing: 3px; display: block; margin-bottom: 25px; }
+        .wallet-node {
+            font-family: monospace; font-size: 10px; color: var(--neon);
+            background: rgba(0, 242, 254, 0.05); padding: 10px;
+            border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--neon);
+        }
 
-        input { width: 100%; padding: 18px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: #1a1f2b; color: white; font-size: 16px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; background: linear-gradient(45deg, #0088cc, #00f2fe); color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn:hover { box-shadow: 0 0 20px var(--accent); }
+        .ai-card {
+            background: var(--card); border-radius: 30px; padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+        }
 
-        #res { margin-top: 25px; background: #1a1f2b; padding: 20px; border-radius: 20px; text-align: left; display: none; border-left: 4px solid var(--gold); line-height: 1.6; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .name-tag { color: var(--accent); font-weight: bold; font-size: 18px; display: block; margin-bottom: 10px; }
+        .sticker-box { font-size: 80px; margin-bottom: 10px; transition: 0.3s; height: 100px; display: flex; align-items: center; justify-content: center; }
+
+        h1 { font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .badge { color: var(--gold); font-size: 12px; font-weight: bold; margin-bottom: 25px; display: block; }
+
+        input {
+            width: 100%; padding: 18px; border-radius: 15px; border: none;
+            background: #252a34; color: white; font-size: 16px; margin-bottom: 15px;
+            box-sizing: border-box; outline: none; border: 1px solid transparent;
+        }
+        input:focus { border-color: var(--blue); }
+
+        .btn-action {
+            width: 100%; padding: 18px; border-radius: 15px; border: none;
+            background: linear-gradient(45deg, var(--blue), #55aaff);
+            color: white; font-weight: bold; font-size: 17px; cursor: pointer;
+        }
+
+        #chat-bubble {
+            margin-top: 25px; background: #222831; padding: 20px;
+            border-radius: 20px 20px 20px 5px; text-align: left;
+            display: none; font-size: 14px; line-height: 1.6;
+            border-left: 4px solid var(--neon); animation: slide 0.3s ease-out;
+        }
+
+        @keyframes slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="wallet">NODE: 0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76</div>
-
-    <div class="card">
-        <div id="icon" class="robot-sticker">🤖</div>
-        <h1>Abdugani AI</h1>
-        <span class="ver">PRO MAX 3</span>
-
-        <input type="text" id="target" placeholder="Введите имя знаменитости...">
-        <button class="btn" onclick="findPerson()">НАЙТИ В ИНТЕРНЕТЕ</button>
-
-        <div id="res"></div>
+<div class="main-container">
+    <div class="wallet-node">
+        MASTER_NODE: 0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76
     </div>
 
+    <div class="ai-card">
+        <div id="status-icon" class="sticker-box">🤖</div>
+        <h1>Abdugani AI</h1>
+        <span class="badge">PRO MAX 3 • ONLINE</span>
+
+        <input type="text" id="userInput" placeholder="Спроси или введи пример (2+2)..." onkeypress="handleKey(event)">
+        <button class="btn-action" onclick="processQuery()">ОТПРАВИТЬ ЗАПРОС</button>
+
+        <div id="chat-bubble"></div>
+    </div>
+</div>
+
 <script>
-    async function findPerson() {
-        const input = document.getElementById('target');
-        const icon = document.getElementById('icon');
-        const res = document.getElementById('res');
-        const name = input.value.trim();
+    const icons = { idle: "🤖", math: "🔢", search: "🌐", hello: "👋", ok: "✅", fail: "⚠️" };
 
-        if (!name) return;
+    function handleKey(e) { if(e.key === 'Enter') processQuery(); }
 
-        res.style.display = "block";
-        res.innerHTML = "<i>Ищу данные о человеке в глобальной сети...</i>";
-        icon.innerText = "🔍";
+    async function processQuery() {
+        const input = document.getElementById('userInput');
+        const icon = document.getElementById('status-icon');
+        const bubble = document.getElementById('chat-bubble');
+        const val = input.value.trim();
 
+        if (!val) return;
+
+        bubble.style.display = "block";
+        bubble.innerHTML = "<i>Связь с сервером...</i>";
+        icon.innerText = icons.search;
+
+        const lowVal = val.toLowerCase();
+
+        // 1. ПРОВЕРКА НА МАТЕМАТИКУ
+        const mathMatch = val.replace(/,/g, '.').match(/^[0-9+\-*/().\s^%]+$/);
+        if (mathMatch && /[0-9]/.test(val)) {
+            try {
+                icon.innerText = icons.math;
+                const result = eval(val.replace(/\^/g, '**'));
+                setTimeout(() => {
+                    icon.innerText = icons.ok;
+                    bubble.innerHTML = `<b>Математический расчет:</b><br>${val} = <b>${result}</b>`;
+                }, 500);
+                input.value = ""; return;
+            } catch(e) {}
+        }
+
+        // 2. ПРИВЕТСТВИЕ
+        if (["привет", "салом", "hello"].includes(lowVal)) {
+            icon.innerText = icons.hello;
+            bubble.innerHTML = "Привет! Я <b>Abdugani AI Pro Max 3</b>. Я подключен к интернету и готов отвечать на твои вопросы или считать примеры.";
+            input.value = ""; return;
+        }
+
+        // 3. ИНТЕРНЕТ-ПОИСК (Wikipedia API)
         try {
-            // Поиск биографии через открытый API интернета
-            const response = await fetch(`https://wikipedia.org{encodeURIComponent(name)}?origin=*`);
+            const url = `https://wikipedia.org{encodeURIComponent(val)}?origin=*`;
+            const response = await fetch(url);
             const data = await response.json();
 
             if (data.extract) {
-                icon.innerText = "😎";
-                res.innerHTML = `<span class="name-tag">${data.title}</span>${data.extract}`;
+                icon.innerText = icons.ok;
+                bubble.innerHTML = `<b>Найдено в сети: ${data.title}</b><br><br>${data.extract}`;
             } else {
-                icon.innerText = "🤔";
-                res.innerHTML = "Данные об этом человеке не найдены. Попробуйте ввести Имя и Фамилию точнее.";
+                icon.innerText = icons.idle;
+                bubble.innerHTML = "Информации в базе не найдено. Попробуй спросить иначе или введи математический пример.";
             }
-        } catch (e) {
-            icon.innerText = "⚠️";
-            res.innerHTML = "Ошибка подключения к интернету.";
+        } catch (error) {
+            icon.innerText = icons.fail;
+            bubble.innerHTML = "Ошибка подключения к сети. Проверь интернет.";
         }
+
         input.value = "";
     }
 </script>
+
 </body>
 </html>
