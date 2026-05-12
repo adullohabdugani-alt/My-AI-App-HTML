@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Persistent Edition</title>
+    <title>Abdugani AI - 10 Chances</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
@@ -45,20 +45,25 @@
 </div>
 
 <script>
-    // Загрузка данных из памяти (localStorage не стирается при обновлении)
+    const maxQ = 10; // Строго 10 шансов
+    
+    // Загружаем данные
     let qCount = localStorage.getItem('qCount') ? parseInt(localStorage.getItem('qCount')) : 0;
     let blockEndTime = localStorage.getItem('blockEndTime') ? parseInt(localStorage.getItem('blockEndTime')) : null;
     let lastRes = localStorage.getItem('lastRes') || "";
     let curL = 'ru';
-    const maxQ = 10;
 
-    // Восстановление состояния при загрузке
+    // Показываем актуальное кол-во шансов (10 минус потраченные)
+    function updateCounter() {
+        document.getElementById('counter').innerText = "Шансов осталось: " + Math.max(0, maxQ - qCount);
+    }
+
     if (lastRes) {
         const out = document.getElementById('res');
         out.style.display = "block";
         out.innerHTML = lastRes;
     }
-    document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
+    updateCounter();
 
     setInterval(() => {
         const now = new Date().getTime();
@@ -72,13 +77,11 @@
                 let s = Math.floor((diff % 60000) / 1000);
                 document.getElementById('timeLeft').innerText = `${m}м ${s}с`;
             } else {
-                // Сброс блокировки
                 blockEndTime = null;
                 qCount = 0;
-                localStorage.removeItem('blockEndTime');
-                localStorage.setItem('qCount', 0);
+                localStorage.clear(); // Полная очистка после разблокировки
                 document.getElementById('payWall').style.display = 'none';
-                document.getElementById('counter').innerText = "Шансов осталось: 10";
+                updateCounter();
             }
         }
     }, 1000);
@@ -87,11 +90,6 @@
         curL = l;
         document.querySelectorAll('.btn-l').forEach(btn => btn.classList.remove('active'));
         b.classList.add('active');
-    }
-
-    function copyW() {
-        navigator.clipboard.writeText("0x8e44a5C91015Cf76e6ab5CB06A852016A71D7f76");
-        alert("Кошелек скопирован!");
     }
 
     async function runAI() {
@@ -103,32 +101,23 @@
 
         qCount++;
         localStorage.setItem('qCount', qCount);
-        document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
+        updateCounter();
         
         out.style.display = "block";
         out.innerText = "Думаю...";
 
         let low = val.toLowerCase();
-        let finalHTML = "";
+        let result = "";
 
-        if (low.includes("код") || low.includes("html") || low.includes("css")) {
-            finalHTML = "<!-- Пример кода -->\n<div style='background: linear-gradient(to right, #00f2fe, #9d00ff); padding: 20px; border-radius: 15px; color: white; text-align: center;'>\n  <h1>Abdugani AI</h1>\n  <p>Код сохранен в памяти.</p>\n</div>";
+        // Простая логика ответов
+        if (low.includes("код") || low.includes("html")) {
+            result = "<div>HTML Код готов!</div>";
         } else {
-            let calc = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/');
-            if (/^[0-9+\-*/().\s*]+$/.test(calc) && /[0-9]/.test(calc)) {
-                try { finalHTML = "Результат: " + eval(calc); } catch { finalHTML = "Ошибка в расчете"; }
-            } else {
-                try {
-                    const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
-                    const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
-                    const d = await r.json();
-                    finalHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Информация не найдена.";
-                } catch { finalHTML = "Ошибка сети."; }
-            }
+            result = "Я получил твой запрос: " + val;
         }
 
-        out.innerHTML = finalHTML;
-        localStorage.setItem('lastRes', finalHTML); // Запоминаем ответ
+        out.innerHTML = result;
+        localStorage.setItem('lastRes', result);
 
         if (qCount >= maxQ) {
             blockEndTime = new Date().getTime() + 3600000;
