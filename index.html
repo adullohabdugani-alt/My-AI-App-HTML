@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abdugani AI - Fixed Edition</title>
+    <title>Abdugani AI - Persistent Edition</title>
     <style>
         :root { --blue: #00f2fe; --purple: #9d00ff; --dark: #0a0a12; }
         body { margin: 0; background: var(--dark); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
-        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; }
+        .card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 35px; border: 1px solid var(--blue); text-align: center; backdrop-filter: blur(15px); position: relative; overflow: hidden; }
         .row { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
         .btn-l { background: transparent; border: 1px solid var(--blue); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; }
         .btn-l.active { background: var(--blue); color: black; font-weight: bold; }
@@ -45,29 +45,38 @@
 </div>
 
 <script>
-    // ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ПАМЯТИ ПРИ ЗАПУСКЕ
-    sessionStorage.clear(); // Очищаем сессию
-    let qCount = 0; // Начинаем с нуля
+    // Загрузка данных из памяти (localStorage не стирается при обновлении)
+    let qCount = localStorage.getItem('qCount') ? parseInt(localStorage.getItem('qCount')) : 0;
+    let blockEndTime = localStorage.getItem('blockEndTime') ? parseInt(localStorage.getItem('blockEndTime')) : null;
+    let lastRes = localStorage.getItem('lastRes') || "";
     let curL = 'ru';
     const maxQ = 10;
-    let blockEndTime = null;
 
-    // Часы и проверка времени
+    // Восстановление состояния при загрузке
+    if (lastRes) {
+        const out = document.getElementById('res');
+        out.style.display = "block";
+        out.innerHTML = lastRes;
+    }
+    document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
+
     setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString();
+        const now = new Date().getTime();
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
 
         if (blockEndTime) {
-            const diff = blockEndTime - now.getTime();
+            const diff = blockEndTime - now;
             if (diff > 0) {
                 document.getElementById('payWall').style.display = 'flex';
                 let m = Math.floor(diff / 60000);
                 let s = Math.floor((diff % 60000) / 1000);
                 document.getElementById('timeLeft').innerText = `${m}м ${s}с`;
             } else {
-                // Время вышло - всё обнуляем
+                // Сброс блокировки
                 blockEndTime = null;
                 qCount = 0;
+                localStorage.removeItem('blockEndTime');
+                localStorage.setItem('qCount', 0);
                 document.getElementById('payWall').style.display = 'none';
                 document.getElementById('counter').innerText = "Шансов осталось: 10";
             }
@@ -93,39 +102,37 @@
         if (!val || blockEndTime) return;
 
         qCount++;
+        localStorage.setItem('qCount', qCount);
         document.getElementById('counter').innerText = "Шансов осталось: " + (maxQ - qCount);
+        
         out.style.display = "block";
         out.innerText = "Думаю...";
 
         let low = val.toLowerCase();
+        let finalHTML = "";
 
-        // 1. ПОИСК HTML КОДА
         if (low.includes("код") || low.includes("html") || low.includes("css")) {
-            out.innerText = "<!-- Пример лучшего HTML кода -->\n<div style='background: linear-gradient(to right, #00f2fe, #9d00ff); padding: 20px; border-radius: 15px; color: white; text-align: center;'>\n  <h1>Abdugani AI</h1>\n  <p>Этот код сгенерирован специально для вас.</p>\n</div>";
-        } 
-        // 2. МАТЕМАТИКА
-        else {
+            finalHTML = "<!-- Пример кода -->\n<div style='background: linear-gradient(to right, #00f2fe, #9d00ff); padding: 20px; border-radius: 15px; color: white; text-align: center;'>\n  <h1>Abdugani AI</h1>\n  <p>Код сохранен в памяти.</p>\n</div>";
+        } else {
             let calc = val.replace(/×/g, '*').replace(/x/g, '*').replace(/÷/g, '/');
             if (/^[0-9+\-*/().\s*]+$/.test(calc) && /[0-9]/.test(calc)) {
-                try { out.innerText = "Результат: " + eval(calc); } catch { out.innerText = "Ошибка в расчете"; }
+                try { finalHTML = "Результат: " + eval(calc); } catch { finalHTML = "Ошибка в расчете"; }
             } else {
-                // 3. ПРИВЕТСТВИЕ И ИНТЕРНЕТ
-                if (["привет", "hello", "salom"].includes(low)) {
-                    out.innerText = "Привет! Я Abdugani AI. Чем могу помочь?";
-                } else {
-                    try {
-                        const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
-                        const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
-                        const d = await r.json();
-                        out.innerHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Информация не найдена в интернете.";
-                    } catch { out.innerText = "Ошибка сети."; }
-                }
+                try {
+                    const lang = curL === 'uz' ? 'uz' : (curL === 'en' ? 'en' : 'ru');
+                    const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(val)}?origin=*`);
+                    const d = await r.json();
+                    finalHTML = d.extract ? `<b>${d.title}</b><br>${d.extract}` : "Информация не найдена.";
+                } catch { finalHTML = "Ошибка сети."; }
             }
         }
 
-        // БЛОКИРОВКА ПОСЛЕ 10 ЗАПРОСОВ
+        out.innerHTML = finalHTML;
+        localStorage.setItem('lastRes', finalHTML); // Запоминаем ответ
+
         if (qCount >= maxQ) {
-            blockEndTime = new Date().getTime() + 3600000; // Ровно 1 час
+            blockEndTime = new Date().getTime() + 3600000;
+            localStorage.setItem('blockEndTime', blockEndTime);
         }
         input.value = "";
     }
